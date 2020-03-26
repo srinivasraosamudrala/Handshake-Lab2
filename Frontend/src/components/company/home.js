@@ -35,11 +35,11 @@ class Home extends Component {
 
     //get the job data from backend  
     componentDidMount() {
-        console.log("get req")
-        const data = {
-            'companyId': localStorage.getItem('companyId')
-        }
-        console.log(data)
+        // console.log("get req")
+        // const data = {
+        //     'companyId': localStorage.getItem('companyId')
+        // }
+        // console.log(data)
         axios.get(environment.baseUrl+'/company/list-of-jobs-and-events/' + localStorage.getItem('companyId')+'/jobs')
             .then((response) => {
                 //update the state with the response data
@@ -47,9 +47,6 @@ class Home extends Component {
                     joblist: response.data.result
                 })
                 console.log(this.state.joblist)
-                // this.setState({
-                //     books : this.state.books.concat(response.data) 
-                // });
             });
     }
 
@@ -88,7 +85,7 @@ class Home extends Component {
                             <div style={{padding:'10px 0px 10px 50px'}}>
                                 <div className="row App-align">
                                     <div className="col-md-9" style={{ fontSize: "23px", color: "#1569E0",marginLeft:"-10px" }}>{job.title}</div>
-                                    <div className="col-md-3"><button class="btn btn-primary" style={{backgroundColor:'#1569E0', marginLeft:'15px', borderRadius:'15px'}} value={job.jobId} onClick={this.viewApplicants}>View Applicants</button></div>
+                                    <div className="col-md-3"><button class="btn btn-primary" style={{backgroundColor:'#1569E0', marginLeft:'15px', borderRadius:'15px'}} value={job.job_id} onClick={this.viewApplicants}>View Applicants</button></div>
                                 </div>
                                 <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-usd" style={{ color: "#1569E0" }}></span> {job.salary+" per hour"}</div>
                                 <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-map-marker" style={{ color: "#1569E0" }}></span> {job.location}</div>

@@ -2,33 +2,29 @@ var express = require('express');
 var app = express();
 var connection = require('../dbConnection');
 const studentDBQueries = require('../Database/studentDBQueries')
-var studentQueries;
+const query = require('../Database/mongooseQueries')
+const Student = require('../Models/studentModel')
 
 exports.signUp = (studentDetails,callback) => {
+        try{
+            query.saveDocuments(Student.createModel(),studentDetails,{runValidators:false},(err,result)=>{
+                callback(err,result)
+            });
+        }
+        catch(error){
+            return callback(error,null)
+        }
+}
+
+exports.signIn = (studentDetails,callback) => {
     try{
-        console.log(studentDetails);
-        let error = false;
-        let result = true;
-        //connection.connect();
-        connection.query(studentDBQueries.studentSignup,
-                    [studentDetails.firstname,studentDetails.lastname,studentDetails.email,studentDetails.password,studentDetails.college],
-                    (error,result)=>{
-                        callback(error,result)
-                    })
-        console.log("success");
+        query.findDocumentsByQuery(Student.createModel(),{email:studentDetails.email,password:studentDetails.password},{runValidators:false},(err,result)=>{
+        callback(err,result)
+        });
     }
     catch(error){
         return callback(error,null)
     }
-}
-
-exports.signIn = (studentDetails,callback) => {
-    console.log(studentDetails)
-    connection.query(studentDBQueries.studentSignIn,
-                    [studentDetails.email,studentDetails.password],
-                    (error,result)=>{
-                    callback(error,result)
-                    })
 }
 
 exports.nameUpdate = (studentDetails,callback) => {

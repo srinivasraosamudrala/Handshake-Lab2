@@ -55,17 +55,14 @@ class addEvent extends Component{
         //prevent page from refresh
         e.preventDefault();
         const data = {
-            companyId   : localStorage.getItem('companyId'),
-            eventname   : this.state.name,
-            date        : this.state.date,
+            company_id   : localStorage.getItem('companyId'),
+            event_name   : this.state.name,
+            event_description : this.state.description,
             time        : this.state.time,
-            description : this.state.description,
+            date        : this.state.date,
             location    : this.state.location,
             eligibility : this.state.eligibility
         }
-        console.log("company ID")
-        console.log(localStorage.getItem('companyId'))
-        console.log(this.state.companyId)
         //set the with credentials to true
         axios.defaults.withCredentials = true;
         //make a post request with the user data

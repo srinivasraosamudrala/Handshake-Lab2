@@ -24,12 +24,22 @@ const saveDocuments = (modelObject, result,options,callback) => {
         callback(err,null)
     }
 }
-const updateField = async (modelObject, id, update) => {
+const updateField = (modelObject, id, update, callback) => {
+    console.log("update")
     try {
-        return await modelObject.findOneAndUpdate({ id }, update, { useFindAndModify: false });
+        modelObject.findOneAndUpdate({ _id  : id}, update, { useFindAndModify: false, new:true},(err,result)=>{
+            if (result){
+                console.log(result)
+                callback(err,result)
+            }
+            else if (err){
+                console.log(err)
+                callback(err,null)
+            }
+        });
     } catch (error) {
-        logger.error("Error while updating data:" + error)
-        throw new Error(error);
+        console.log("Error while updating data:" + error)
+        callback(err,null)
     }
 }
 module.exports.findDocumentsByQuery = findDocumentsByQuery;

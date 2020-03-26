@@ -48,8 +48,8 @@ class Signup extends Component{
         e.preventDefault();
         const data = {
             signup : true,
-            firstname : this.state.firstname,
-            lastname : this.state.lastname,
+            first_name : this.state.firstname,
+            last_name : this.state.lastname,
             email : this.state.email,
             password : this.state.password,
             college : this.state.college

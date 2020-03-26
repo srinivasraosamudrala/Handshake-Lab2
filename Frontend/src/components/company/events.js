@@ -82,11 +82,11 @@ class Events extends Component {
                             <CardContent>
                             <div style={{padding:'10px 0px 10px 50px'}}>
                                 <div className="row App-align">
-                                    <div className="col-md-9" style={{ fontSize: "23px", color: "#1569E0",marginLeft:"-10px" }}>{event.eventname}</div>
+                                    <div className="col-md-9" style={{ fontSize: "23px", color: "#1569E0",marginLeft:"-10px" }}>{event.event_name}</div>
                                     <div className="col-md-3"><button class="btn btn-primary" style={{backgroundColor:'#1569E0', marginLeft:'15px', borderRadius:'15px'}}  onClick={()=>{this.viewRegistrations(event.eventId)}}>View Registrations</button></div>
                                 </div>
-                                <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-calendar" style={{ color: "#1569E0" }}></span> Date - {event.date.substring(0,9)}   Time - {event.time}</div>
-                                <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-map-marker" style={{ color: "#1569E0" }}></span>{event.location}</div>
+                                <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-calendar" style={{ color: "#1569E0" }}></span> Timings: {event.date.substring(0,10)} at {event.time}</div>
+                                <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-map-marker" style={{ color: "#1569E0" }}></span> {event.location}</div>
                                 <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-ok" style={{ color: "#1569E0" }}></span> Eligibility:{event.eligibility}</div>
                                 {/* <div style={{ fontSize: "21px" }}> Description : {this.state.currentjob.description}</div> */}
                             </div>

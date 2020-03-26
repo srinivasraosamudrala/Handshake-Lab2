@@ -6,8 +6,10 @@ var path = require('path');
 var multer = require('multer');
 var connection = require('../dbConnection');
 const fs = require('fs');
-	const AWS = require('aws-sdk');
-	const s3 = new AWS.S3({
+const Company = require('../Models/companyModel');
+const query = require('../Database/mongooseQueries')
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3({
 	    accessKeyId:
 	        "AKIAIXZQ2BJZTGBO36DQ",
 	    secretAccessKey:
@@ -61,15 +63,15 @@ router.post('/signup',(req,res) => {
 }
 })
 
-router.get('/list-of-jobs-and-events/:companyId/:type',(req,res)=>{
+router.get('/list-of-jobs-and-events/:company_id/:type',(req,res)=>{
     if(req.params.type == 'jobs'){
-        companyRepo.getJoblist(req.params.companyId,(error,result) =>{
+        companyRepo.getJoblist(req.params.company_id,(error,result) =>{
             if(error)
                 res.send({'error':error})
             else{
                 res.send({result})}
         })}else if(req.params.type == 'events'){
-            companyRepo.getEventlist(req.params.companyId,(error,result) =>{
+            companyRepo.getEventlist(req.params.company_id,(error,result) =>{
                 if(error)
                     res.send({'error':error})
                 else{
@@ -105,9 +107,8 @@ router.post('/listApplicants',(req,res)=>{
             res.json({"error":err})
         }
         else{
-        console.log(result)
-        res.json({'result':result})}
-        
+            console.log(result)
+            res.json({"result":result})}
     }) 
 })
 
@@ -169,12 +170,32 @@ router.post('/uploadpic', upload.single('profilepic'), async (request, response)
         console.log(fileContent)
         console.log(request.body)
         console.log(request.body.companyId);
-        const query = 'update mydb.company set profilepic=? where companyId=?';
-        console.log('upload pic')
-        const rows = await connection.query(query, [fileContent, request.body.companyId]);
-  
-        return response.status(200).json({ "message": "success" });
-      }
+        const params = {
+            Bucket: 'handshakesrinivas',
+            Key: req.body.company_id + path.extname(req.file.originalname),
+            Body: fileContent,
+            ContentType: req.file.mimetype
+        };
+
+        s3.upload(params, function (err, data) {
+            if (err) {
+                return response.status(500).json({ "error": err.message })
+            }
+            console.log(data);
+            let companyDetails = {
+                    company_id:request.body.companyId,
+                    image:data.Location
+                }
+        companyRepo.updateCompanyProfilePic(companyDetails,(err,result)=>{
+            if(err){
+                console.log(err)
+                response.json({"error":err})
+            }   
+            else{
+                response.json({"result":result})
+            }
+        });
+      })}
     } catch (ex) {
       const message = ex.message ? ex.message : 'Error while uploading image';
       const code = ex.statusCode ? ex.statusCode : 500;

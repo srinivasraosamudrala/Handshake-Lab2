@@ -44,7 +44,6 @@ class addJob extends Component{
     }
 
     postJob = (e) => {
-        //var headers = new Headers();
         //prevent page from refresh
         e.preventDefault();
         const data = {

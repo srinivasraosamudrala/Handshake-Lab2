@@ -20,7 +20,8 @@ class Profile extends Component {
             location:"",
             email:"",
             phone:"",
-            profilepic:emptyPic
+            companydesc:"",
+            image:emptyPic
         }
         this.editProfile = this.editProfile.bind(this);
         this.fetchCompanydetails = this.fetchCompanydetails.bind(this);
@@ -41,11 +42,12 @@ class Profile extends Component {
         console.log(localStorage.getItem('companyId'))
         axios.get(environment.baseUrl+'/company/profile/' + localStorage.getItem('companyId'))
             .then((response) => {
+                    console.log(response.data)
                     var base64Flag = 'data:image/jpeg;base64,';
                     
-                    if (response.data.result[0].profilepic!== null) {
-                        var imgstring = this.arrayBufferToBase64(response.data.result[0].profilepic.data);
-                         response.data.result[0].profilepic = base64Flag + imgstring
+                    if (response.data.result[0].image) {
+                        var imgstring = this.arrayBufferToBase64(response.data.result[0].image.data);
+                         response.data.result[0].image = base64Flag + imgstring
                     }
 
                 this.setState({
@@ -53,11 +55,12 @@ class Profile extends Component {
                     companyname:response.data.result[0].name,
                     location:response.data.result[0].location,
                     email:response.data.result[0].email,
-                    phone:response.data.result[0].Phone,
-                    companydesc:response.data.result[0].companydesc,
-                    profilepic:response.data.result[0].profilepic
+                    phone:response.data.result[0].phone,
+                    companydesc:response.data.result[0].company_description,
+                    image:response.data.result[0].image
                 })
                 console.log(this.state.profile)
+                console.log(this.state.companydesc)
             })
     }
 
@@ -76,8 +79,9 @@ class Profile extends Component {
     };
 
     showProfilepic = async (e) => {
+        console.log("profilepic")
         this.setState({
-            profilepic : e.target.files[0]
+            image : e.target.files[0]
         })
         e.preventDefault();
 
@@ -102,15 +106,19 @@ class Profile extends Component {
     }
 
     saveProfile = () =>{
+        console.log(this.state.companydesc)
         let data={
-            'companyId':localStorage.getItem('companyId'),
-            'companyname':this.state.companyname,
+            'company_id':localStorage.getItem('companyId'),
+            'name':this.state.companyname,
             'location':this.state.location,
             'email':this.state.email,
-            'phone':this.state.phone
+            'phone':this.state.phone,
+            'company_description':this.state.companydesc
         }
+        console.log(data)
         axios.put(environment.baseUrl+'/company/updateprofile', data)
             .then((response)=>{
+                console.log(response.data)
                 if (response.data.result) {
                     this.editProfile()
                     this.fetchCompanydetails()
@@ -133,8 +141,8 @@ class Profile extends Component {
                             <CardContent><div style ={{paddingTop:'30px'}}>
                                 {/* <img src = {Company_Logo} alt = 'Logo' height='70' width='70' ></img> */}
                                 <div class="upload-btn-img">
-                                    <img src={this.state.profilepic} height='70' width='70' class="img-thumbnail1 p-0 m-0" alt="Company"/>
-                                    <input type="file" name="profilepic" onChange={this.showProfilepic} />
+                                    <img src={this.state.image} height='70' width='70' class="img-thumbnail1 p-0 m-0" alt="Company"/>
+                                    <input type="file" name="image" onChange={this.showProfilepic} />
                                 </div>
                                 <div style = {{position:'relative', top:'-95px',left:'85px',marginTop:'20px'}}>
                                     <div className="col-md-8">
@@ -151,7 +159,7 @@ class Profile extends Component {
                                         </div>
                                     </div>
                                     <div className="col-md-4">
-                                        <Button variant="contained" size="small" color="primary" style = {{position:'relative',top:'-70px',left:'150px', backgroundColor : "#1569E0", width:'2px', marginRight:'10px' }} onClick={()=>{this.saveProfile()}}>Save</Button>
+                                        <Button variant="contained" size="small" color="primary" style = {{position:'relative',top:'-70px',left:'150px', backgroundColor : "#1569E0", width:'2px', marginRight:'10px' }} onClick={()=>{console.log("save");this.saveProfile()}}>Save</Button>
                                         <Button variant="contained" size="small" color="primary" style = {{position:'relative',top:'-70px',left:'150px', backgroundColor : "#808080", width:'2px'}} onClick={()=>{this.editProfile()}}>Cancel</Button>
                                     </div></div>
                             </CardContent>
@@ -161,7 +169,7 @@ class Profile extends Component {
                         <Card>
                             <CardContent>
                                 <h4>{'About ' + this.state.companyname}</h4>
-                                <textarea name="companydesc" rows="4" cols="80" style={{borderRadius:'5px'}}>
+                                <textarea name="companydesc" rows="4" cols="80" style={{borderRadius:'5px'}}  onChange={this.inputChangeHandler}>
                                     {this.state.companydesc}
                                 </textarea>
                             </CardContent>
@@ -174,11 +182,11 @@ class Profile extends Component {
                                 <div class="form-group">
                                     <div class="active-pink-4 mb-4" style={{ width: "90%",marginBottom:"15px",marginTop:"20px"}}>
                                         <div style={{fontSize : "12px", marginTop:'15px',marginBottom:"7px"}}>Email</div>
-                                        <input class="form-control" type="text"  name="email" value = {this.state.email} style={{ width: "80%", }} placeholder="Email" aria-label="Company Name" onChange={this.inputChangeHandler}/>
+                                        <input class="form-control" type="text"  name="email" value = {this.state.email} style={{ width: "80%" }} placeholder="Email" aria-label="Company Name" onChange={this.inputChangeHandler}/>
                                     </div> 
                                     <div class="active-pink-4 mb-4" style={{ width: "90%"}}>
                                         <div style={{fontSize : "12px", marginTop:'15px',marginBottom:"7px"}}>Phone</div>
-                                        <input class="form-control" type="text"  name="phone" value = {this.state.phone} style={{ width: "80%", }} placeholder="Phone" aria-label="Location" onChange={this.inputChangeHandler}/>
+                                        <input class="form-control" type="text"  name="phone" value = {this.state.phone} style={{ width: "80%" }} placeholder="Phone" aria-label="Location" onChange={this.inputChangeHandler}/>
                                     </div> 
                                 </div>
                             </CardContent>
@@ -193,7 +201,7 @@ class Profile extends Component {
             <Card style={{borderTopRightRadius:'0px',borderTopLeftRadius:'0px'}}>
                         <CardContent><div style ={{paddingTop:'30px'}}>
                             {/* <img src = {Company_Logo} alt = 'Logo' height='70' width='70' ></img> */}
-                            <img src = {this.state.profilepic} alt = 'Logo' height='70' width='70' ></img>
+                            <img src = {this.state.image} alt = 'Logo' height='70' width='70' ></img>
                             <div style = {{position:'relative', top:'-70px',left:'85px'}}>
                                 <div className="col-md-9">
                                     <div><h4>{this.state.profile.name}</h4></div>
@@ -211,7 +219,7 @@ class Profile extends Component {
                     <Card>
                         <CardContent>
                             <h4>{'About ' + this.state.profile.name}</h4>
-                            {this.state.profile.companydesc}
+                            {this.state.profile.company_description}
                         </CardContent>
                     </Card>
                     </div>
@@ -222,7 +230,7 @@ class Profile extends Component {
                             <div style={{fontSize : "12px", marginTop:'15px'}}>Email</div>
                             <div style={{color: "#1569E0"}}><span class="glyphicon glyphicon-envelope" style={{color: "Black" }}></span>  {this.state.profile.email}</div>
                             <div style={{fontSize : "12px", marginTop:'10px'}}>Phone</div>
-                            <div style={{color: "#1569E0"}}><span class="glyphicon glyphicon-earphone" style={{color: "Black" }}></span>  {this.state.profile.Phone}</div>
+                            <div style={{color: "#1569E0"}}><span class="glyphicon glyphicon-earphone" style={{color: "Black" }}></span>  {this.state.profile.phone}</div>
                         </CardContent>
                     </Card>
                  </div>

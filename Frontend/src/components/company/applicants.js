@@ -95,7 +95,7 @@ class ViewApplicants extends Component {
     fetchApplicants(){
         let companyId = localStorage.getItem('companyId')
         const data = {
-            id: companyId,
+            company_id: companyId,
             job_id:this.state.job_id
         }
         console.log(data)

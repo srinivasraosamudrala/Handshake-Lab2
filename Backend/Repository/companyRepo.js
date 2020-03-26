@@ -27,15 +27,9 @@ exports.signIn = (companyDetails,callback) => {
     }
 }
 
-exports.getJoblist = (companyId,callback) => {
-    // connection.query(companyDBQueries.getJobList,
-    //                     [companyId],
-    //                     (error,result)=>{
-    //                         console.log(result)
-    //                         callback(error,result)
-    //                     })
+exports.getJoblist = (company_id,callback) => {
     try{
-        query.findDocumentsByQuery(Jobs.createModel(),{email:companyDetails.email,password:companyDetails.password},{runValidators:false},(err,result)=>{
+        query.findDocumentsByQuery(Jobs.createModel(),{company_id:company_id},{runValidators:false},(err,result)=>{
             callback(err,result)
         });
     }
@@ -43,23 +37,18 @@ exports.getJoblist = (companyId,callback) => {
         return callback(error,null)
     }
 }
-exports.getEventlist = (companyId,callback) => {
-    connection.query(companyDBQueries.getEventList,
-                        [companyId],
-                        (error,result)=>{
-                            console.log(result)
-                            callback(error,result)
-                        })
+exports.getEventlist = (company_id,callback) => {
+    try{
+        query.findDocumentsByQuery(Events.createModel(),{company_id:company_id},{runValidators:false},(err,result)=>{
+            callback(err,result)
+        });
+    }
+    catch(error){
+        return callback(error,null)
+    }
 }
 
 exports.postJob = (companyDetails,callback) => {
-
-    // connection.query(companyDBQueries.postjob,
-    //                     [companyDetails.companyId,companyDetails.title,companyDetails.postingDate,companyDetails.deadline,companyDetails.location,companyDetails.salary,companyDetails.jobdescription,companyDetails.category],
-    //                     (error,result) => {
-    //                         callback(error,result)
-    //                     })
-
     try{
         query.saveDocuments(Jobs.createModel(),companyDetails,{runValidators:false},(err,result)=>{
             callback(err,result)
@@ -72,13 +61,15 @@ exports.postJob = (companyDetails,callback) => {
 
 }
 
-exports.postEvent = (companyDetails,callback) => {
-    console.log(companyDetails)
-    connection.query(companyDBQueries.postevent,
-                        [companyDetails.companyId,companyDetails.eventname,companyDetails.description,companyDetails.time,companyDetails.date,companyDetails.location,companyDetails.eligibility],
-                        (error,result) => {
-                            callback(error,result)
-                        })
+exports.postEvent = (eventDetails,callback) => {
+    try{
+        query.saveDocuments(Events.createModel(),eventDetails,{runValidators:false},(err,result)=>{
+            callback(err,result)
+        });
+    }
+    catch(error){
+        return callback(error,null)
+    }
 }
 
 exports.listApplicants = (data,callback)=>{
@@ -124,31 +115,48 @@ exports.updateStudentstatus = (data,callback)=>{
     }
 };
 
-exports.getCompanyProfile = (companyId,callback) => {
+exports.getCompanyProfile = (company_id,callback) => {
     try{
-        connection.query(companyDBQueries.getCompanyProfile,
-            [companyId],
-            (err,result) => {
-                callback(err,result)
-            });
+        query.findDocumentsByQuery(Company.createModel(),{_id:company_id},{runValidators:false},(err,result)=>{
+            callback(err,result)
+        });
     }
-    catch(e)
+    catch(err)
     {
-        callback()
+        callback(err,null)
     }
 }
 
 exports.updateCompanyProfile = (companyDetails,callback) => {
     try{
-        connection.query(companyDBQueries.updateCompanyProfile,
-            [companyDetails.companyname,companyDetails.location,companyDetails.email,companyDetails.phone,companyDetails.companyId],
-            (err,result) => {
-                callback(err,result)
-            });
+        let update = {
+            name: companyDetails.name,
+            email: companyDetails.email,
+            location: companyDetails.location,
+            phone: companyDetails.phone,
+            company_description: companyDetails.company_description
+        }
+        console.log(update)
+        query.updateField(Company.createModel(),companyDetails.company_id,update,(err,result)=>{
+            callback(err,result)
+        });
     }
-    catch(e)
+    catch(err)
     {
-        callback()
+        callback(err,null)
+    }
+}
+
+exports.updateCompanyProfilePic = (companyDetails,callback) => {
+    try{
+        image = new companyModel()
+        query.updateField(Company.createModel(),companyDetails.company_id,{image:companyDetails.image},(err,result)=>{
+            callback(err,result)
+        });
+    }
+    catch(err)
+    {
+        callback(err,null)
     }
 }
 
