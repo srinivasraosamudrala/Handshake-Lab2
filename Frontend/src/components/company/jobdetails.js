@@ -65,11 +65,11 @@ class Home extends Component {
         let jobarr = this.state.joblist
         console.log("Start",jobarr)
         let joblistvar = [];
-        if (!cookie.load('companycookie')) {
+        // if (!cookie.load('companycookie')) {
             console.log("going to login")
             redirectVar = <Redirect to="/login" />
 
-        }
+        // }
         if (this.state.view_applicants === true) {
             redirectVar = <Redirect to={`/company/applicants/${this.state.editJob}`}/>
         }

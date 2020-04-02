@@ -61,16 +61,17 @@ class Login extends Component{
         //make a post request with the user data
         axios.post(environment.baseUrl+'/student/signup',data)
             .then(response => {
-                if(response.data[0]){
+                console.log(response.data)
+                if(response.data){
                     this.setState({
                         authFlag : true,
                         authError : false
                     })
-                    localStorage.setItem('studentId', response.data[0].studentId);
-                    localStorage.setItem('studentfirstname', response.data[0].firstName);
-                    localStorage.setItem('studentlastname', response.data[0].lastName);
-                    localStorage.setItem('studentemail', response.data[0].email);
-                    localStorage.setItem('studentcollege', response.data[0].college);
+                    localStorage.setItem('studentId', response.data._id);
+                    localStorage.setItem('studentfirstname', response.data.first_name);
+                    localStorage.setItem('studentlastname', response.data.last_name);
+                    localStorage.setItem('studentemail', response.data.email);
+                    localStorage.setItem('studentcollege', response.data.college);
                     this.props.loginUser(response.data[0])
                 }else{
                     console.log(response.data.error)
@@ -86,7 +87,8 @@ class Login extends Component{
         //redirect based on successful login
         let redirectVar = null;
         let invalid = null;
-        if(cookie.load('studentcookie')){
+        // if(cookie.load('studentcookie')){
+        if(localStorage.getItem('studentId')){
             console.log("redirect")
             redirectVar = <Redirect to= "/student/jobs/search"/>
         }

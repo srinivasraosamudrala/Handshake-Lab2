@@ -5,9 +5,10 @@ var app = express();
 var path = require('path');
 var multer = require('multer');
 var connection = require('../dbConnection');
+var kafka = require('../kafka/client');
 const fs = require('fs');
-	const AWS = require('aws-sdk');
-	const s3 = new AWS.S3({
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3({
 	    accessKeyId:
 	        "AKIAIXZQ2BJZTGBO36DQ",
 	    secretAccessKey:
@@ -34,34 +35,48 @@ const fs = require('fs');
     })
 
 router.post('/signup',(req,res) => {
-    let body = req.body
-    if(body.signup == true){
-        studentRepo.signUp(body,(error,result)=>{
-            if(error){
-                console.log(error)
-                //res.json(error)
-                res.json({'error':error})
-            }else{
-                //res.json(result)
-                res.json({'result':'Login Successful'})
-            }
-    })
-    }else{
-    studentRepo.signIn(body,(error,result)=>{
-        console.log(result)
-        console.log(result.studentId)
-        if(error){
-            console.log(error)
-            res.json({'error':error})
-        }else if(result.length == 0){
-            res.json({error:"invalid user credentials"})
+    // let body = req.body
+    kafka.make_request('student_signin',req.body, (err,result) => {
+        console.log('in result');
+        console.log(result);
+        if (err){
+            console.log("Inside err");
+            res.json({'error':err})
+        }else if(result.error){
+            res.json({'error':result.error})
         }else{
-            res.cookie('studentcookie',"student",{maxAge: 900000, httpOnly: false, path : '/'});
-            res.json(result)
+            console.log("Inside result");
+                console.log(result)
+                res.json(result);
+            }
+    });
+//     if(body.signup == true){
+//         studentRepo.signUp(body,(error,result)=>{
+//             if(error){
+//                 console.log(error)
+//                 //res.json(error)
+//                 res.json({'error':error})
+//             }else{
+//                 //res.json(result)
+//                 res.json({'result':'Login Successful'})
+//             }
+//     })
+//     }else{
+//     studentRepo.signIn(body,(error,result)=>{
+//         console.log(result)
+//         console.log(result.studentId)
+//         if(error){
+//             console.log(error)
+//             res.json({'error':error})
+//         }else if(result.length == 0){
+//             res.json({error:"invalid user credentials"})
+//         }else{
+//             res.cookie('studentcookie',"student",{maxAge: 900000, httpOnly: false, path : '/'});
+//             res.json(result)
             
-        }
-    })
-}
+//         }
+//     })
+// }
 })
 
 router.post('/profile/',(req,res) => {
@@ -172,15 +187,58 @@ router.get('/profile/:studentId',(req,res)=>{
 // })
 
 router.get('/jobsearch/:studentId',(req,res)=>{
-    console.log("response")
-    studentRepo.getJobdetailsforstudent(req.params.studentId,(error,result)=>{
-        if(error){
-            res.json({'error':error})
+    req.body.studentId = req.params.studentId
+    req.body.path = "getJobdetailsforstudent"
+    kafka.make_request('student-jobs',req.body, (err,result) => {
+        console.log('in result');
+        console.log(result);
+        if (err){
+            console.log("Inside err");
+            res.json({'error':err})
+        }else if(result.error){
+            res.json({'error':result.error})
         }else{
-            console.log(result)
-            res.json({'result':result})
-        }   
-    })
+            console.log("Inside result");
+                console.log(result)
+                res.json(result);
+            }
+    });
+    // studentRepo.getJobdetailsforstudent(req.params.studentId,(error,result)=>{
+    //     if(error){
+    //         res.json({'error':error})
+    //     }else{
+    //         console.log(result)
+    //         res.json({'result':result})
+    //     }   
+    // })
+})
+
+router.post('/education',(req,res)=>{
+    console.log("education")
+    console.log(req.body)
+    // studentRepo.getStudentEducation(req.body,(error,result)=>{
+    //     if(error){
+    //         res.json({'error':error})
+    //     }else{
+    //         console.log(result)
+    //         res.json({'education':result})
+    //     }   
+    // })
+    req.body.path = "getStudentEducation"
+    kafka.make_request('student-jobs',req.body, (err,result) => {
+        console.log('in result');
+        console.log(result);
+        if (err){
+            console.log("Inside err");
+            res.json({'error':err})
+        }else if(result.error){
+            res.json({'error':result.error})
+        }else{
+            console.log("Inside result");
+                console.log(result)
+                res.json(result);
+            }
+    });
 })
 
 router.get('/jobapplications/:studentId',(req,res)=>{
@@ -241,27 +299,59 @@ router.get('/studentsearch/:studentId',(req,res)=>{
 })
 
 router.get('/events/:studentId',(req,res)=>{
-    console.log("response")
-    studentRepo.getEventsdetailsforstudent(req.params.studentId,(error,result)=>{
-        if(error){
-            res.json({'error':error})
+    req.body.studentId = req.params.studentId
+    req.body.path = "getEventsdetailsforstudent"
+    kafka.make_request('student-events',req.body, (err,result) => {
+        console.log('in result');
+        console.log(result);
+        if (err){
+            console.log("Inside err");
+            res.json({'error':err})
+        }else if(result.error){
+            res.json({'error':result.error})
         }else{
-            console.log(result)
-            res.json({'result':result})
-        }   
-    })
+            console.log("Inside result");
+                console.log(result)
+                res.json(result);
+            }
+    });
+    // console.log("response")
+    // studentRepo.getEventsdetailsforstudent(req.params.studentId,(error,result)=>{
+    //     if(error){
+    //         res.json({'error':error})
+    //     }else{
+    //         console.log(result)
+    //         res.json({'result':result})
+    //     }   
+    // })
 })
 
 router.get('/eventregistrations/:studentId',(req,res)=>{
     console.log("response")
-    studentRepo.getRegistrationsStudent(req.params.studentId,(error,result)=>{
-        if(error){
-            res.json({'error':error})
+    req.body.studentId = req.params.studentId
+    req.body.path = "getRegistrationsStudent"
+    kafka.make_request('student-events',req.body, (err,result) => {
+        console.log('in result');
+        console.log(result);
+        if (err){
+            console.log("Inside err");
+            res.json({'error':err})
+        }else if(result.error){
+            res.json({'error':result.error})
         }else{
-            console.log(result)
-            res.json({'result':result})
-        }   
-    })
+            console.log("Inside result");
+                console.log(result)
+                res.json(result);
+            }
+    });
+    // studentRepo.getRegistrationsStudent(req.params.studentId,(error,result)=>{
+    //     if(error){
+    //         res.json({'error':error})
+    //     }else{
+    //         console.log(result)
+    //         res.json({'result':result})
+    //     }   
+    // })
 })
 
 router.post('/uploadpic', upload.single('profilepic'), async (request, response) => {
@@ -286,27 +376,31 @@ router.post('/uploadpic', upload.single('profilepic'), async (request, response)
 
   router.post('/registerEvent', (req,res)=>{
     console.log(req.body)
-    studentRepo.eventRegister(req.body,(error,result)=>{
-        if(error){
-            res.json({'error':error})
+    req.body.path = 'eventRegister'
+    kafka.make_request('student-events',req.body, (err,result) => {
+        console.log('in result');
+        console.log(result);
+        if (err){
+            console.log("Inside err");
+            res.json({'error':err})
+        }else if(result.error){
+            res.json({'error':result.error})
         }else{
-            console.log(result)
-            res.json({'result':result})
-        }   
-    })
+            console.log("Inside result");
+                console.log(result)
+                res.json(result);
+            }
+    });
+    // studentRepo.eventRegister(req.body,(error,result)=>{
+    //     if(error){
+    //         res.json({'error':error})
+    //     }else{
+    //         console.log(result)
+    //         res.json({'result':result})
+    //     }   
+    // })
 });
 
-router.post('/education',(req,res)=>{
-    console.log("education")
-    console.log(req.body)
-    studentRepo.getStudentEducation(req.body,(error,result)=>{
-        if(error){
-            res.json({'error':error})
-        }else{
-            console.log(result)
-            res.json({'education':result})
-        }   
-    })
-})
+
 
 module.exports = router;

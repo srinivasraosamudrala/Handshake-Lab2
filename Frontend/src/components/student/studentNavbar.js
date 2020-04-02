@@ -28,7 +28,8 @@ class StudentNav extends Component {
         let navHeader = null;
         let navUpdate = null;
         let redirect = null;
-        if(cookie.load('studentcookie')){
+        // if(cookie.load('studentcookie')){
+        if (localStorage.getItem('studentId')){
             if(this.props.comp === "jobapplications")
             {
                 navUpdate = (

@@ -138,7 +138,7 @@ class Profile extends Component {
             companyEdit = (
                 <div>
                 <Card style={{borderTopRightRadius:'0px',borderTopLeftRadius:'0px'}}>
-                            <CardContent><div style ={{paddingTop:'30px'}}>
+                            <CardContent><div style ={{paddingTop:'30px', position: 'relative', top: '30px'}}>
                                 {/* <img src = {Company_Logo} alt = 'Logo' height='70' width='70' ></img> */}
                                 <div class="upload-btn-img">
                                     <img src={this.state.image} height='70' width='70' class="img-thumbnail1 p-0 m-0" alt="Company"/>
@@ -199,7 +199,7 @@ class Profile extends Component {
         companyEdit = (
             <div>
             <Card style={{borderTopRightRadius:'0px',borderTopLeftRadius:'0px'}}>
-                        <CardContent><div style ={{paddingTop:'30px'}}>
+                        <CardContent><div style ={{paddingTop:'30px', position: 'relative', top: '30px' }}>
                             {/* <img src = {Company_Logo} alt = 'Logo' height='70' width='70' ></img> */}
                             <img src = {this.state.image} alt = 'Logo' height='70' width='70' ></img>
                             <div style = {{position:'relative', top:'-70px',left:'85px'}}>

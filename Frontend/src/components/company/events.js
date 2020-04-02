@@ -39,7 +39,7 @@ class Events extends Component {
             .then((response) => {
                 //update the state with the response data
                 this.setState({
-                    eventlist: response.data.result
+                    eventlist: response.data
                 })
                 console.log(this.state.eventlist)
             });
@@ -56,7 +56,8 @@ class Events extends Component {
         let redirectVar = null;
         let eventarr = this.state.eventlist
         let eventlistvar = [];
-        if (!cookie.load('companycookie')) {
+        // if (!cookie.load('companycookie')) {
+        if (localStorage.getItem('company_id')) {
             console.log("going to login")
             redirectVar = <Redirect to="/company/login" />
 
@@ -72,8 +73,8 @@ class Events extends Component {
             console.log(this.state.editJob)
             viewEvent = <Redirect to={`/company/events/registrations/${this.state.editJob}`}/>
         }
-
-        if (eventarr.length > 0) {
+        console.log(eventarr)
+        if (eventarr) {
             eventlistvar = (<div>
                 {eventarr.map(event => {
                     return (

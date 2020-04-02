@@ -17,15 +17,15 @@ class Navbar extends Component {
     }
     //handle logout to destroy the cookie
     handleLogout = () => {
-        if (cookie.load('companycookie')){
+        // if (cookie.load('companycookie')){
             localStorage.removeItem('companyId')
             localStorage.removeItem('sstudentId')
-            cookie.remove('companycookie', { path: '/' })
-        }else{
+            // cookie.remove('companycookie', { path: '/' })
+        // }else{
             localStorage.removeItem('studentId')
             localStorage.removeItem('sstudentId')
-            cookie.remove('studentcookie',{ path:'/' })
-        }
+            // cookie.remove('studentcookie',{ path:'/' })
+        // }
     }
     changeActivenav = (e) => {
         this.setState({
@@ -38,7 +38,8 @@ class Navbar extends Component {
         let navHeader = null;
         let navUpdate = null;
         let redirectVar = null;
-        if(cookie.load('companycookie')){
+        // if(cookie.load('companycookie')){
+        if(localStorage.getItem('companyId')){
             console.log("Able to read company cookie");
             navHeader = (
                 <div class="navbar-header">
@@ -57,7 +58,8 @@ class Navbar extends Component {
                     </ul>
                 </div>
             );
-        }else if (cookie.load('studentcookie')){
+        // }else if (cookie.load('studentcookie')){
+        }else if(localStorage.getItem('studentId')){
             console.log("student cookie");
             navHeader = (
                 <div class="navbar-header">

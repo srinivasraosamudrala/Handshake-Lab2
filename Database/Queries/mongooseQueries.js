@@ -1,6 +1,6 @@
-const findDocumentsByQuery = async (modelObject, query, options, callback) => {
+const findDocumentsByQuery = async (modelObject, query, projection, options, callback) => {
     try {
-        modelObject.find(query, options,(err,result)=>{callback(err,result)}).lean();
+        modelObject.find(query, projection, options,(err,result)=>{callback(err,result)}).lean();
     } catch (error) {
         callback(err,null)
     }
@@ -43,29 +43,36 @@ const updateField = (modelObject, id, update, callback) => {
     }
 }
 
-// router.get('/getstudentsappliedtoevent', (req, res) => {
-// const lookup = (modelObject,collection,)
-//     const agg = [
-//       {
-//         $lookup:
-//           {
-//             from: collection,
-//             localField: '_Id',
-//             foreignField: 'registrations.studentid',
-//             as: 'event_studentdetails',
-//           },
-//       },
-//     ];
-//     modelObject.aggregate(agg).exec((err, result) => {
-//       if (err) {
-//         console.log(err);
-//         return res.status(404).send(err);
-//       }
-//       console.log('success');
-//       res.status(200).send(result);
-//     });
-//   });
+const findDocumentsByLookup = (modelObject,lookupObject, query, local, foreign, aggName, callback) => {
+    try {
+        const agg = [
+            { $match: query },
+            {
+                $lookup:
+                {
+                    from: lookupObject,
+                    localField: local,
+                    foreignField: foreign,
+                    as: aggName
+                },
+            },
+        ];
+        modelObject.aggregate(agg).exec((err, data) => {
+            if (data) {
+                console.log(data)
+                callback(err, data)
+            }
+            else if (err) {
+                callback(err, data)
+            }
+        });
+    } catch (error) {
+        console.log("Error while saving data:" + error)
+        callback(err, null)
+    }
+}
 
 module.exports.findDocumentsByQuery = findDocumentsByQuery;
 module.exports.saveDocuments = saveDocuments;
 module.exports.updateField = updateField;
+module.exports.findDocumentsByLookup = findDocumentsByLookup;

@@ -45,7 +45,6 @@ class JobSearch extends Component {
         this.setState({
             [e.target.name]: value
         })
-        console.log(this.state.namesearch)
     }
 
     getResume = (e) => {
@@ -55,7 +54,6 @@ class JobSearch extends Component {
     }
 
     showJob = (e) => {
-        console.log(e)
         this.setState({
             jobindex: e
         })
@@ -89,8 +87,6 @@ class JobSearch extends Component {
     applyJob = async (jobId,companyId) => {
         let appiledJob = []
         let fdata = new FormData();
-        //    console.log(this.state);
-        //    console.log(this.props);
         fdata.append('jobId', jobId);
         fdata.append('companyId',companyId)
         fdata.append('studentId', localStorage.getItem('studentId'));
@@ -139,20 +135,18 @@ class JobSearch extends Component {
         this.setState({ studentId: localStorage.getItem('studentId') })
         axios.get(environment.baseUrl+'/student/jobsearch/' + localStorage.getItem('studentId'))
             .then((response) => {
-               // console.log(response.data)
-                if (response.data.result.length>0) {
-                    var base64Flag = 'data:image/jpeg;base64,';
-                    response.data.result.map((job,index) => {
-                        console.log("profile")
-                        if (job.profilepic!== null) {
-                            var imgstring = this.arrayBufferToBase64(job.profilepic.data);
-                             job.profilepic = base64Flag + imgstring
-                            // console.log(job.profilepic)
-                        }
-                        //console.log(job.profilepic)
-                    } )
+                if (response.data.length>0) {
+                    // console.log(response.data[1].Company[0].name)
+                    // var base64Flag = 'data:image/jpeg;base64,';
+                    // response.data.map((job,index) => {
+                    //     console.log("profile")
+                    //     // if (job.Company[0].image!== null) {
+                    //     //     var imgstring = this.arrayBufferToBase64(job.Company[0].image);
+                    //     //     job.Company[0].image = base64Flag + imgstring
+                    //     // }
+                    // } )
                     this.setState({
-                        joblist: response.data.result
+                        joblist: response.data
                     })
             }
                 
@@ -161,7 +155,6 @@ class JobSearch extends Component {
     }
 
     render() {
-        console.log(this.state.joblist)
         let jobs = null;
         let detailedjob = null;
         let jobdetailed = null;
@@ -179,7 +172,7 @@ class JobSearch extends Component {
             if (namesearch.length>0)
             {
                 joblist = joblist.filter((job) => {
-                    return (job.title.indexOf(namesearch) > -1 || job.name.indexOf(namesearch) > -1)
+                    return (job.title.indexOf(namesearch) > -1 || job.Company[0].name.indexOf(namesearch) > -1)
                 })
             }
 
@@ -189,7 +182,6 @@ class JobSearch extends Component {
                     return job.location.indexOf(locsearch) > -1
                 })
             }
-            console.log(joblist)
             if (jobfilter.length > 0) {
                 joblist = joblist.filter((job) => {
                     return jobfilter.indexOf(job.category) > -1
@@ -202,9 +194,9 @@ class JobSearch extends Component {
                             return (<div >
                                 <Link onClick={() => this.showJob(index)} style={{ color: 'rgba(0, 0, 0, 0.8)' }}>
                                     <p style={{ fontSize: '16px', fontWeight: '700' }}>{job.title}</p>
-                                    <p style={{ fontSize: '16px', fontWeight: '400' }}>{job.name}-{job.location}</p>
+                                    <p style={{ fontSize: '16px', fontWeight: '400' }}>{job.Company[0].name}-{job.location}</p>
                                     <p style={{ fontSize: '14px', fontWeight: '400' }}>{job.category}</p>
-                                    <p>-------------------------------------------------------------------</p>
+                                    <hr style = {{width:'200%', position:"relative", left:"-50px"}}></hr>
                                     {/* <svg>
                                         <line x1="0" y1="0" x2="300" y2="0" style={{stroke:'rgb(255,0,0)',strokeWidth:'3'}} />
                                     </svg> */}
@@ -219,13 +211,13 @@ class JobSearch extends Component {
                     <div>
                     <div style={{float:"left", position:'relative',left:'10px',top:'-20px'}}><img src={jobdetailed.profilepic?jobdetailed.profilepic:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',top:'20px',left:'-30px'}} alt='Profile'/></div>
                      <div><p style={{ fontSize: '24px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{jobdetailed.title}</p>
-                        <p style={{ fontSize: '18px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{jobdetailed.name}</p>
+                        <p style={{ fontSize: '18px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{jobdetailed.Company[0].name}</p>
                         <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>{jobdetailed.category}</p>
                         <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>{jobdetailed.location}</p>
-                        <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>Posted {jobdetailed.postingDate}</p></div>
+                        <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>Posted on {jobdetailed.posting_date}</p></div>
                         <div style={{ border: 'Solid 1px', borderRadius: '5px', padding: '30px', marginBottom: '24px' }}>
                             <div class = 'col-md-9'> 
-                            <p style={{ fontSize: '16px', fontWeight: '500', color: 'rgba(0,0,0,.8)', position:'relative', top:'-12px',left:'-15px'}}>Applications close on {jobdetailed.deadline.slice(0,10)}</p></div>
+                            <p style={{ fontSize: '16px', fontWeight: '500', color: 'rgba(0,0,0,.8)', position:'relative', top:'-12px',left:'-15px'}}>Applications close on {jobdetailed.deadline}</p></div>
                             <div class = 'col-md-3'>                            
                             <button class="btn btn-primary" style={{ backgroundColor: '#0d7f02', position:'relative', top:'-18px',border:'0px'}} onClick={()=>this.uploadResume(jobdetailed.companyId,jobdetailed.jobId)}>Quick Apply</button></div>
                             <Dialog
@@ -249,7 +241,7 @@ class JobSearch extends Component {
                         </div>
                         <div >
                         <h2 style={{ fontSize: '27px', fontWeight: 'bold', textDecoration: 'underline', color: 'rgba(0, 0, 0, 0.8)' }}>{jobdetailed.title}</h2>
-                        <p style={{ lineHeight: '20px', fontSize: '16px' }}>{jobdetailed.jobdesc}</p>
+                        <p style={{ lineHeight: '20px', fontSize: '16px' }}>{jobdetailed.job_description}</p>
                         </div>
                     </div>
                 )

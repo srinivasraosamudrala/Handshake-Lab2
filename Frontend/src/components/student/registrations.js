@@ -44,18 +44,18 @@ class Registrations extends Component {
         this.setState({ studentId: localStorage.getItem('studentId') })
         axios.get(environment.baseUrl+'/student/eventregistrations/' + localStorage.getItem('studentId'))
             .then((response) => {
-                // console.log(response.data)
-                if (response.data.result) {
-                    var base64Flag = 'data:image/jpeg;base64,';
-                    response.data.result.map((event,index) => {
-                        console.log("profile")
-                        if (event.profilepic!== null) {
-                            var imgstring = this.arrayBufferToBase64(event.profilepic.data);
-                             event.profilepic = base64Flag + imgstring
-                        }
-                    } )
+                console.log(response.data)
+                if (response.data) {
+                    // var base64Flag = 'data:image/jpeg;base64,';
+                    // response.data.result.map((event,index) => {
+                    //     console.log("profile")
+                    //     if (event.profilepic!== null) {
+                    //         var imgstring = this.arrayBufferToBase64(event.profilepic.data);
+                    //          event.profilepic = base64Flag + imgstring
+                    //     }
+                    // } )
                 this.setState({
-                    registrations: response.data.result
+                    registrations: response.data
                 });
             }
             })
@@ -79,8 +79,8 @@ class Registrations extends Component {
                         <div class="col-md-1" style={{marginTop:'20px'}}>
                             <img src={app.profilepic?app.profilepic:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',top:'-12px',left:'-10px'}} alt='Profile'/></div>
                         <div class="col-md-9" style={{marginBottom:'16px'}}>
-                        <div style={{fontSize: '16px', fontWeight: '700' }}>{app.eventname}</div>
-                        <div style={{fontSize: '16px', fontWeight: '500' }}>{app.name}</div>
+                        <div style={{fontSize: '16px', fontWeight: '700' }}>{app.event_name}</div>
+                        <div style={{fontSize: '16px', fontWeight: '500' }}>{app.Company[0].name}</div>
                         <div style={{fontSize: '16px', fontWeight: '500'}}>{"Location:" + app.location}</div>
                         <div>Event is on {app.date} at {app.time}</div></div>
                     </CardContent>

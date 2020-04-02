@@ -57,9 +57,8 @@ class Signup extends Component{
         console.log(environment.baseUrl+'/company/signup')
         axios.post(environment.baseUrl+'/company/signup',data)
             .then(response => {
-                console.log("Status Code : ",response.status);
-                console.log(response.data)
-                if(response.data.result){
+                console.log(response)
+                if(response.data === ""){
                     this.setState({
                         authFlag : true,
                         authError : false

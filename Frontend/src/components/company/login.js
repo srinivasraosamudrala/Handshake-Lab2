@@ -55,14 +55,14 @@ class Login extends Component {
         //make a post request with the user data
         axios.post(environment.baseUrl+'/company/signup', data)
             .then(response => {
-                console.log(response.data)
-                if (response.data.companyId) {
+                console.log(response)
+                if (!response.data.error) {
+                    localStorage.setItem('companyId', response.data._id);
                     this.setState({
                         authFlag: true,
                         authError: false,
-                        companyid: response.data.companyId
+                        companyid: response.data._id
                     })
-                    localStorage.setItem('companyId', response.data.companyId);
                 } else {
                     console.log(response.data.error)
                     this.setState({
@@ -77,8 +77,9 @@ class Login extends Component {
         //redirect based on successful login
         let redirectVar = null;
         let invalid = null;
-        if (cookie.load('companycookie')) {
-            localStorage.setItem('companyId', this.state.companyid)
+        // if (cookie.load('companycookie')) {
+        if (localStorage.getItem('companyId')){
+            console.log("route to home")
             redirectVar = <Redirect to='/company/home' />
         }
 

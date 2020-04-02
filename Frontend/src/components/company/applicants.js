@@ -103,7 +103,7 @@ class ViewApplicants extends Component {
             .then(response => {
                 console.log("in frontend after response");
                 console.log(response.data.result)
-                if (response.data.result.length>0) {
+                if (response.data.result) {
                         var base64Flag = 'data:image/jpeg;base64,';
                         response.data.result.map((student,index) => {
                             console.log("profile")
@@ -169,6 +169,7 @@ class ViewApplicants extends Component {
         console.log(stuData)
         return (
             <div>
+                {console.log("applicants")}
                 <div class="container">
                             <div class="panel1">
                                 <h2 style={{position:'relative',top:'10px'}}>Students Applied </h2>

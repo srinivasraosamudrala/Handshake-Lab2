@@ -56,12 +56,13 @@ class Events extends Component {
         let data = {
             'eventId':eventId,
             'companyId':companyId,
-            'studentId':Number(localStorage.getItem('studentId'))
+            'studentId':localStorage.getItem('studentId')
         }
         if ((eligibility !== this.state.studentedu) && (eligibility !== 'All Majors')){
             this.setState({
                 showalert:true})
         }else{
+        console.log(data)
         axios.post(environment.baseUrl+'/student/registerEvent' ,data)
         .then((response) => {
             console.log(response.data)
@@ -69,7 +70,7 @@ class Events extends Component {
             this.setState({
                 appliedjob: appiledJob.push(eventId)
             })
-
+            console.log(this.state.appliedjob)
         })}
     }
 
@@ -85,21 +86,22 @@ class Events extends Component {
         axios.get(environment.baseUrl+'/student/events/' + localStorage.getItem('studentId'))
             .then((response) => {
                 console.log(response.data)
-                if (response.data.result) {
-                    var base64Flag = 'data:image/jpeg;base64,';
-                    response.data.result.map((event,index) => {
-                        console.log("profile")
-                        if (event.profilepic!== null) {
-                            var imgstring = this.arrayBufferToBase64(event.profilepic.data);
-                             event.profilepic = base64Flag + imgstring
-                        }
-                    } )
+                if (response.data) {
+                    // var base64Flag = 'data:image/jpeg;base64,';
+                    // response.data.result.map((event,index) => {
+                    //     console.log("profile")
+                    //     if (event.profilepic!== null) {
+                    //         var imgstring = this.arrayBufferToBase64(event.profilepic.data);
+                    //          event.profilepic = base64Flag + imgstring
+                    //     }
+                    // } )
                 this.setState({
-                    eventlist: response.data.result
+                    eventlist: response.data
                 });
             }
             axios.post(environment.baseUrl+'/student/education',{'studentId':localStorage.getItem('studentId')})
                 .then((response)=>{
+                    console.log(response)
                     this.setState({
                         studentedu:response.data.education[0].major
                     })
@@ -132,10 +134,10 @@ class Events extends Component {
                         {eventlist.map((event, index) => {
                             return (<div >
                                 <Link onClick={() => this.showEvent(index)} style={{ color: 'rgba(0, 0, 0, 0.8)' }}>
-                                    <p style={{ fontSize: '16px', fontWeight: '700' }}>{event.eventname}</p>
-                                    <p style={{ fontSize: '16px', fontWeight: '400' }}>{event.name}-{event.location}</p>
+                                    <p style={{ fontSize: '16px', fontWeight: '700' }}>{event.event_name}</p>
+                                    <p style={{ fontSize: '16px', fontWeight: '400' }}>{event.Company[0].name} - {event.location}</p>
                                     <p style={{ fontSize: '14px', fontWeight: '400' }}>{event.eligibility}</p>
-                                    <p>-------------------------------------------</p></Link>
+                                    <hr style = {{width:'200%', position:"relative", left:"-50px"}}></hr></Link>
                             </div>
                             )
                         })}
@@ -146,19 +148,19 @@ class Events extends Component {
                     <div>
                         {erroralert}
                         <div style={{float:'left'}}><img src={eventdetailed.profilepic?eventdetailed.profilepic:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',left:'-10px'}} alt='Profile'/></div>
-                        <div><p style={{ fontSize: '24px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{eventdetailed.eventname}</p>
-                        <p style={{ fontSize: '18px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{eventdetailed.name}</p>
+                        <div><p style={{ fontSize: '24px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{eventdetailed.event_name}</p>
+                        <p style={{ fontSize: '18px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{eventdetailed.Company[0].name}</p>
                         <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>{eventdetailed.eligibility}</p>
                         <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>{eventdetailed.location}</p>
                         <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>Posted </p></div>
                         <div style={{ border: 'Solid 1px', borderRadius: '5px', padding: '30px', marginBottom: '24px' }}>
                             <div class = 'col-md-9'> 
-                            <p style={{ fontSize: '16px', fontWeight: '500', color: 'rgba(0,0,0,.8)', position:'relative', top:'-12px',left:'-15px'}}>Event is on {eventdetailed.date + " " + eventdetailed.time}</p></div>
+                            <p style={{ fontSize: '16px', fontWeight: '500', color: 'rgba(0,0,0,.8)', position:'relative', top:'-12px',left:'-15px'}}>Event is on {eventdetailed.date} at {eventdetailed.time}</p></div>
                             <div class = 'col-md-3'>
-                            <button class="btn btn-primary" style={{ backgroundColor: '#0d7f02', position:'relative', top:'-15px',border:'0px'}} onClick={()=>this.registerEvent(eventdetailed.eventId,eventdetailed.companyId,eventdetailed.eligibility)}>Register</button></div>
+                            <button class="btn btn-primary" style={{ backgroundColor: '#0d7f02', position:'relative', top:'-15px',border:'0px'}} onClick={()=>this.registerEvent(eventdetailed._id,eventdetailed.company_id,eventdetailed.eligibility)}>Register</button></div>
                         </div>
-                        <h2 style={{ fontSize: '27px', fontWeight: 'bold', textDecoration: 'underline', color: 'rgba(0, 0, 0, 0.8)' }}>{eventdetailed.eventname}</h2>
-                        <p style={{ lineHeight: '20px', fontSize: '16px' }}>{eventdetailed.eventdesc}</p>
+                        <h2 style={{ fontSize: '27px', fontWeight: 'bold', textDecoration: 'underline', color: 'rgba(0, 0, 0, 0.8)' }}>{eventdetailed.event_name}</h2>
+                        <p style={{ lineHeight: '20px', fontSize: '16px' }}>{eventdetailed.event_description}</p>
                     </div>
                 )
             }

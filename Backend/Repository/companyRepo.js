@@ -1,4 +1,3 @@
-var express = require('express');
 const companyDBQueries = require('../Database/companyDBQueries');
 const Company = require('../Models/companyModel')
 const Jobs = require('../Models/jobModel')
@@ -75,9 +74,29 @@ exports.postEvent = (eventDetails,callback) => {
 exports.listApplicants = (data,callback)=>{
     console.log(data)
     try{
-        connection.query(companyDBQueries.listApplicants,[data.id,data.job_id], (err,rows) => {
-            callback(err,rows)
-        });
+        // connection.query(companyDBQueries.listApplicants,[data.id,data.job_id], (err,rows) => {
+        //     callback(err,rows)
+        // });
+            console.log('Inside get students applied to job');
+            const agg = [
+              {
+                $lookup:
+                  {
+                    from: 'jobs',
+                    localField: '_id',
+                    foreignField: 'applications.student_id',
+                    as: 'job_applicants',
+                  },
+              },
+            ];
+            student.aggregate(agg).exec((err, result) => {
+              if (err) {
+                console.log(err);
+                return res.status(404).send(err);
+              }
+              console.log('success');
+              res.status(200).send(result);
+            });
     }
     catch(e)
     {

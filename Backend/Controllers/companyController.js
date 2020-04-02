@@ -5,10 +5,12 @@ var app = express();
 var path = require('path');
 var multer = require('multer');
 var connection = require('../dbConnection');
+var kafka = require('../kafka/client');
 const fs = require('fs');
 const Company = require('../Models/companyModel');
 const query = require('../Database/mongooseQueries')
 const AWS = require('aws-sdk');
+
 const s3 = new AWS.S3({
 	    accessKeyId:
 	        "AKIAIXZQ2BJZTGBO36DQ",
@@ -36,71 +38,129 @@ const s3 = new AWS.S3({
     })
 
 router.post('/signup',(req,res) => {
-    let body = req.body
-    if(body.signup == true){
-        companyRepo.signUp(body,(error,result)=>{
-            if(error){
-                console.log(error)
-                res.json({'error':error})
-            }else{
-                console.log("successs")
-                res.json({'result':"signup successful"})
-            }
-    })
+//     let body = req.body
+//     if(body.signup == true){
+//         companyRepo.signUp(body,(error,result)=>{
+//             if(error){
+//                 console.log(error)
+//                 res.json({'error':error})
+//             }else{
+//                 console.log("successs")
+//                 res.json({'result':"signup successful"})
+//             }
+//     })
+//     }else{
+//     companyRepo.signIn(body,(error,result)=>{
+//         console.log(result)
+//         console.log(result.companyId)
+//         if(error){
+//             res.json({'error':error})
+//         }else if(result.length === 0){
+//             res.json({'error':"invalid user credentials"})
+//         }else{
+//             res.cookie('companycookie',"company",{maxAge: 900000, httpOnly: false, path : '/'});
+//             res.json({'companyId' : result[0]._id})
+//         }
+//     })
+// }
+    kafka.make_request('login-signup',req.body, (err,result) => {
+    console.log('in result');
+    console.log(result);
+    if (err){
+        console.log("Inside err");
+        res.json({'error':err})
+    }else if(result.errors){
+        res.json({'error':result.errors})
     }else{
-    companyRepo.signIn(body,(error,result)=>{
-        console.log(result)
-        console.log(result.companyId)
-        if(error){
-            res.json({'error':error})
-        }else if(result.length === 0){
-            res.json({'error':"invalid user credentials"})
-        }else{
-            res.cookie('companycookie',"company",{maxAge: 900000, httpOnly: false, path : '/'});
-            res.json({'companyId' : result[0]._id})
+        console.log("Inside result");
+            console.log(result)
+            if (result.length === 0){
+                console.log("error")
+                res.json({"error":"invalid credentials"})
+            }else{
+            res.json(result[0]);
+            }
         }
-    })
-}
+});
 })
 
 router.get('/list-of-jobs-and-events/:company_id/:type',(req,res)=>{
     if(req.params.type == 'jobs'){
-        companyRepo.getJoblist(req.params.company_id,(error,result) =>{
-            if(error)
-                res.send({'error':error})
+        // companyRepo.getJoblist(req.params.company_id,(error,result) =>{
+        //     if(error)
+        //         res.send({'error':error})
+        //     else{
+        //         res.send({result})}
+        // })
+        let body = {'company_id':req.params.company_id,
+                    'path':'jobslist'}
+        kafka.make_request('company-jobs',body, (err,result) =>{
+            if(err)
+                res.send({'error':err})
             else{
-                res.send({result})}
-        })}else if(req.params.type == 'events'){
-            companyRepo.getEventlist(req.params.company_id,(error,result) =>{
-                if(error)
-                    res.send({'error':error})
-                else{
-                    console.log(result)
-                    res.send({result})}
-        })}
+                res.send(result)}
+        })
+    }else if(req.params.type == 'events'){
+        //     companyRepo.getEventlist(req.params.company_id,(error,result) =>{
+        //         if(error)
+        //             res.send({'error':error})
+        //         else{
+        //             console.log(result)
+        //             res.send({result})}
+        // })
+        let body = {'company_id':req.params.company_id,
+                    'path':'eventslist'}
+        kafka.make_request('company-events',body, (err,result) =>{
+            if(err)
+                res.send({'error':err})
+            else{
+                console.log(result)
+                res.send(result)}
+        })
+    }
 })
 router.post('/postjob',(req,res)=>{
-    companyRepo.postJob(req.body,(error,result) =>{
-        if(error){
-            console.log(error)
-            res.send({'error':error})}
-        else
-            res.send({'result':result})
+    req.body.path = 'postjob'
+    kafka.make_request('company-jobs',req.body, (err,result) =>{
+        if(err)
+            res.send({'error':err})
+        else{
+            res.send({'result':result})}
     })
+    // companyRepo.postJob(req.body,(error,result) =>{
+    //     if(error){
+    //         console.log(error)
+    //         res.send({'error':error})}
+    //     else
+    //         res.send({'result':result})
+    // })
 })
 router.post('/postevent',(req,res)=>{
-    companyRepo.postEvent(req.body,(error,result) =>{
-        if(error){
-            console.log(error)
-            res.send({'error':error})}
-        else
-            res.send({'result':result})
+    req.body.path = 'postevent'
+    kafka.make_request('company-events',req.body, (err,result) =>{
+        if(err)
+            res.send({'error':err})
+        else{
+            res.send({'result':result})}
     })
+    // companyRepo.postEvent(req.body,(error,result) =>{
+    //     if(error){
+    //         console.log(error)
+    //         res.send({'error':error})}
+    //     else
+    //         res.send({'result':result})
+    // })
 })
 
 router.post('/listApplicants',(req,res)=>{
-    console.log("In list applicants from company post request");
-    console.log(req.body);
+    // req.body.path = 'listApplicants'
+    // kafka.make_request('company-jobs',req.body, (err,result) =>{
+    //     if(err)
+    //         res.send({'error':err})
+    //     else{
+    //         res.send({"result":result})}
+    // })
+
     companyRepo.listApplicants(req.body,(err,result)=>{
         if (err){
             console.log(err)
@@ -113,54 +173,81 @@ router.post('/listApplicants',(req,res)=>{
 })
 
 router.post('/listRegistrations',(req,res)=>{
-    console.log("In list applicants from company post request");
-    companyRepo.listRegistrations(req.body,(err,result)=>{
-        if (err){
-            console.log(err)
-            res.json({"error":err})
-        }
+    req.body.path = 'listRegistrations'
+    kafka.make_request('company-events',req.body, (err,result) =>{
+        if(err)
+            res.send({'error':err})
         else{
-        console.log(result)
-        res.json({'result':result})}
-        
-    }) 
+            res.send({"result":result})}
+    })
+    // companyRepo.listRegistrations(req.body,(err,result)=>{
+    //     if (err){
+    //         console.log(err)
+    //         res.json({"error":err})
+    //     }
+    //     else{
+    //     console.log(result)
+    //     res.json({'result':result})}
+    // }) 
 })
 
 
 
 router.put('/updateStudentstatus', (req,res)=>{
-    companyRepo.updateStudentstatus(req.body,(err,result)=>{
-        console.log(req.body)
-        if (err){
-            res.json({"error":err})
-        }
+    req.body.path = 'updateStudentstatus'
+    kafka.make_request('company-jobs',req.body, (err,result) =>{
+        if(err)
+            res.send({'error':err})
         else{
-            res.json({'result':result})}
+            res.send({"result":result})}
     })
+    // companyRepo.updateStudentstatus(req.body,(err,result)=>{
+    //     console.log(req.body)
+    //     if (err){
+    //         res.json({"error":err})
+    //     }
+    //     else{
+    //         res.json({'result':result})}
+    // })
 })
 
 router.get('/profile/:companyId',(req,res)=>{
-    console.log(req.params.companyId)
-    companyRepo.getCompanyProfile(req.params.companyId,(err,result)=>{
-        if(err){
-            res.json({"error":err})
-        }   
-        else{
-            res.json({"result":result})
-        }
-    })
+    let body = {'company_id':req.params.companyId,
+                'path':'companyProfile'}
+        kafka.make_request('company-profile',body, (err,result) =>{
+            if(err)
+                res.send({'error':err})
+            else{
+                res.send({"result":result})}
+        })
+
+    // companyRepo.getCompanyProfile(req.params.companyId,(err,result)=>{
+    //     if(err){
+    //         res.json({"error":err})
+    //     }   
+    //     else{
+    //         res.json({"result":result})
+    //     }
+    // })
 })
 
 router.put('/updateprofile',(req,res)=>{
-    console.log(req.body)
-    companyRepo.updateCompanyProfile(req.body,(err,result)=>{
-        if(err){
-            res.json({"error":err})
-        }   
+    
+    req.body.path = 'companyupdateProfile'
+    kafka.make_request('company-profile',body, (err,result) =>{
+        if(err)
+            res.send({'error':err})
         else{
-            res.json({"result":result})
-        }
+            res.send({"result":result})}
     })
+    // companyRepo.updateCompanyProfile(req.body,(err,result)=>{
+    //     if(err){
+    //         res.json({"error":err})
+    //     }   
+    //     else{
+    //         res.json({"result":result})
+    //     }
+    // })
 })
 
 router.post('/uploadpic', upload.single('profilepic'), async (request, response) => {
