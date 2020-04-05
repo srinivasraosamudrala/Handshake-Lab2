@@ -172,6 +172,8 @@
     position: relative;
     overflow: hidden;
     display: inline-block;
+    height: 110px;
+    width:110px;
 }
 
 .upload-btn-img input[type=file] {
