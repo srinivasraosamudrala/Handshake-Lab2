@@ -1,14 +1,11 @@
 import React, { Component } from 'react';
 import '../../App.css';
 import axios from 'axios';
-import cookie, { save } from 'react-cookies';
+import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, Button, Chip } from '@material-ui/core/';
-import CardActions from '@material-ui/core/CardActions';
 import Typography from '@material-ui/core/Typography';
-import Avatar from '@material-ui/core/Avatar';
-import { deepOrange, deepPurple } from '@material-ui/core/colors';
 import IconButton from '@material-ui/core/IconButton';
 import { connect } from "react-redux";
 import Icon from '@material-ui/core/Icon';
@@ -16,7 +13,13 @@ import EditOutlinedIcon from '@material-ui/icons/EditOutlined';
 import TextField from '@material-ui/core/TextField';
 import emptyPic from '../../images/empty-profile-picture.png';
 import {environment} from '../../Utils/constants'
-import { saveProfileData } from "../../redux/actions/index"
+import { saveProfileData } from "../../redux/actions/index";
+import Profile1 from "./profileComponents/profile1";
+import CareerObj from './profileComponents/careerobj';
+import Skillset from './profileComponents/skills';
+import PersonalInfo from './profileComponents/personalinfo';
+import Education from './profileComponents/education';
+import Experience from './profileComponents/experience';
 
 //Define a Login Component
 class Profile extends Component {
@@ -26,7 +29,8 @@ class Profile extends Component {
         super(props);
         //maintain the state required for this component
         this.state = {
-            studentId: 0,
+            profiledata:"",
+            studentId: "",
             email: "",
             password: "",
             lastname: "",
@@ -71,11 +75,8 @@ class Profile extends Component {
         }
         //Bind the handlers to this class
         this.inputChangeHandler = this.inputChangeHandler.bind(this);
-        this.updateProfile = this.updateProfile.bind(this);
-        this.updateInfo = this.updateInfo.bind(this);
-        this.profile2SaveButton = this.profile2SaveButton.bind(this);
-        this.deleteSkill = this.deleteSkill.bind(this);
-        this.addSkill = this.addSkill.bind(this);
+        // this.updateProfile = this.updateProfile.bind(this);
+        // this.updateInfo = this.updateInfo.bind(this);
         this.seteditEducation = this.seteditEducation.bind(this);
         this.updateExperience = this.updateExperience.bind(this);
         this.updateEducation = this.updateEducation.bind(this)
@@ -97,11 +98,11 @@ class Profile extends Component {
         axios.get(environment.baseUrl+'/student/profile/' + localStorage.getItem('studentId'))
             .then((response) => {
                 //update the state with the response data
-                if(response.data.result){
-                console.log(response.data.result)
-                this.props.saveProfileData(response.data.result)
-                const data = response.data.result
-                let tempskillSet = data.skillset[0].skillSet
+                if(response.data){
+                console.log(response.data)
+                this.props.saveProfileData(response.data)
+                const data = response.data
+                let tempskillSet = data[0].skills
                 let tempskillSetarr = [];
 
                 console.log(tempskillSet)
@@ -110,44 +111,47 @@ class Profile extends Component {
 
                     var base64Flag = 'data:image/jpeg;base64,';
                     
-                    if (data.info[0].profilepic !== null) {
-                        var imgstring = this.arrayBufferToBase64(data.info[0].profilepic.data);
-                         data.info[0].profilepic = base64Flag + imgstring
-                    }
+                    // if (data[0].image !== null) {
+                    //     var imgstring = this.arrayBufferToBase64(data.info[0].profilepic.data);
+                    //      data[0].image = base64Flag + imgstring
+                    // }
 
                 this.setState({
-                    firstname: data.education[0].firstName,
-                    profile1_preferred:data.education[0].firstName,
-                    lastname: data.education[0].lastName,
-                    profile1_last:data.education[0].lastName,
-                    college: data.education[0].college,
-                    degree: data.education[0].degree,
-                    major: data.education[0].major,
-                    gpa: data.education[0].cgpa,
-                    year:data.education[0].year,
-                    college_preferred: data.education[0].college,
-                    degree_preferred: data.education[0].degree,
-                    major_preferred: data.education[0].major,
-                    cgpa_preferred: data.education[0].cgpa,
-                    year_preferred:data.education[0].year,
-                    careerobj: data.basic[0].career_obj,
-                    skillSet:tempskillSetarr,
-                    profilepic1:data.info[0].profilepic,
-                    companyname:data.work[0].companyName,
-                    title:data.work[0].Title,
-                    startDate:data.work[0].startDate,
-                    endDate:data.work[0].endDate,
-                    location:data.work[0].Location,
-                    workdesc:data.work[0].workDesc,
-                    companyname_preferred:data.work[0].companyName,
-                    title_preferred:data.work[0].Title,
-                    startDate_preferred:data.work[0].startDate,
-                    endDate_preferred:data.work[0].endDate,
-                    location_preferred:data.work[0].Location,
-                    workdesc_preferred:data.work[0].workDesc,
+                    profiledata:data[0],
+                    // firstname: data.education[0].firstName,
+                    // profile1_preferred:data.education[0].firstName,
+                    // lastname: data.education[0].lastName,
+                    // profile1_last:data.education[0].lastName,
+                    // college: data.education[0].college,
+                    // degree: data.education[0].degree,
+                    // major: data.education[0].major,
+                    // gpa: data.education[0].cgpa,
+                    // year:data.education[0].year,
+                    // college_preferred: data.education[0].college,
+                    // degree_preferred: data.education[0].degree,
+                    // major_preferred: data.education[0].major,
+                    // cgpa_preferred: data.education[0].cgpa,
+                    // year_preferred:data.education[0].year,
+                    // careerobj: data.basic[0].career_obj,
+                    // skillSet:tempskillSetarr,
+                    // profilepic1:data.info[0].profilepic,
+                    // companyname:data.work[0].companyName,
+                    // title:data.work[0].Title,
+                    // startDate:data.work[0].startDate,
+                    // endDate:data.work[0].endDate,
+                    // location:data.work[0].Location,
+                    // workdesc:data.work[0].workDesc,
+                    // companyname_preferred:data.work[0].companyName,
+                    // title_preferred:data.work[0].Title,
+                    // startDate_preferred:data.work[0].startDate,
+                    // endDate_preferred:data.work[0].endDate,
+                    // location_preferred:data.work[0].Location,
+                    // workdesc_preferred:data.work[0].workDesc,
                 })
 
-                if (data.education[0].college)
+                console.log(this.state.profiledata)
+
+                if (data[0].education.college)
                 {
                     console.log("education")
                     this.setState({
@@ -155,7 +159,7 @@ class Profile extends Component {
                     })
                 }
 
-                if (data.work[0].companyName)
+                if (data[0].experience.companyName)
                 {
                     this.setState({
                         experiencenotempty:true
@@ -265,194 +269,171 @@ class Profile extends Component {
                         })
                     }
 
-    showProfilepic = async (e) => {
-        this.setState({
-            profilepic : e.target.files[0]
-        })
-        e.preventDefault();
-
-        const formData = new FormData();
-        formData.append('studentId', localStorage.getItem('studentId'))
-        formData.append('profilepic', e.target.files[0]);
-      
-        const config = {
-            headers: {
-                'content-type': 'multipart/form-data'
-            }
-        };
-        let rest = await axios.post(environment.baseUrl+"/student/uploadpic",formData, config)
-            .then((response) => {
-                this.setState({
-                    openimage: false,
-                    file:null
-                })
-            }).catch((error) => {
-            });
-    }
+    
 
 
     //submit Login handler to send a request to the node backend
-    updateProfile = (e) => {
-        //var headers = new Headers();
-        //prevent page from refresh
-        let data = {};
-        if (e === 'name') {
-            data = {
-                type: 'name',
-                studentId: this.state.studentId,
-                firstname: this.state.profile1_preferred,
-                lastname: this.state.profile1_last
-            }
-        }
-        console.log(data)
-        //set the with credentials to true
-        axios.defaults.withCredentials = true;
+    // updateProfile = (e) => {
+    //     //var headers = new Headers();
+    //     //prevent page from refresh
+    //     let data = {};
+    //     if (e === 'name') {
+    //         data = {
+    //             type: 'name',
+    //             studentId: this.state.studentId,
+    //             firstname: this.state.profile1_preferred,
+    //             lastname: this.state.profile1_last
+    //         }
+    //     }
+    //     console.log(data)
+    //     //set the with credentials to true
+    //     axios.defaults.withCredentials = true;
 
-        //make a post request with the user data
-        axios.post(environment.baseUrl+'/student/profile', data)
-            .then(response => {
-                console.log(response.data)
-                if (response.data.result) {
-                    this.setState({
-                        firstname: data.firstname,
-                        lastname: data.lastname
-                    })
-                    this.readstudentdata()
-                    console.log(response.data.result)
-                } else {
-                    console.log(response.data.error)
-                }
-                if (data.type === "name"){
-                this.setState(currentState => ({
-                    updateprofile1: !currentState.updateprofile1
-                }))}
-            })
-    }
+    //     //make a post request with the user data
+    //     axios.post(environment.baseUrl+'/student/profile', data)
+    //         .then(response => {
+    //             console.log(response.data)
+    //             if (response.data.result) {
+    //                 this.setState({
+    //                     firstname: data.firstname,
+    //                     lastname: data.lastname
+    //                 })
+    //                 this.readstudentdata()
+    //                 console.log(response.data.result)
+    //             } else {
+    //                 console.log(response.data.error)
+    //             }
+    //             if (data.type === "name"){
+    //             this.setState(currentState => ({
+    //                 updateprofile1: !currentState.updateprofile1
+    //             }))}
+    //         })
+    // }
 
-        //submit Login handler to send a request to the node backend
-        updateProfilefun2 = (e) => {
-            //var headers = new Headers();
-            //prevent page from refresh
-            let data = {};
-            if(e === 'careerobj'){
-                data = {
-                    type:'careerobj',
-                    studentId:this.state.studentId,
-                    careerobj:this.state.newcareerobj
-                }
-            }
-            console.log(data)
-            //set the with credentials to true
-            axios.defaults.withCredentials = true;
+    //     //submit Login handler to send a request to the node backend
+    //     updateProfilefun2 = (e) => {
+    //         //var headers = new Headers();
+    //         //prevent page from refresh
+    //         let data = {};
+    //         if(e === 'careerobj'){
+    //             data = {
+    //                 type:'careerobj',
+    //                 studentId:this.state.studentId,
+    //                 careerobj:this.state.newcareerobj
+    //             }
+    //         }
+    //         console.log(data)
+    //         //set the with credentials to true
+    //         axios.defaults.withCredentials = true;
     
-            //make a post request with the user data
-            axios.post(environment.baseUrl+'/student/profile', data)
-                .then(response => {
-                    console.log(response.data)
-                    if (response.data.result) {
-                        this.setState({
-                            careerobj: data.careerobj
-                        })
-                        console.log(response.data.careerobj)
-                    } else {
-                        console.log(response.data.error)
-                    }
-                        this.setState({
-                            updateprofile2 : false
-                        })
-                        console.log(this.state.updateprofile2)
-                })
-        }
+    //         //make a post request with the user data
+    //         axios.post(environment.baseUrl+'/student/profile', data)
+    //             .then(response => {
+    //                 console.log(response.data)
+    //                 if (response.data.result) {
+    //                     this.setState({
+    //                         careerobj: data.careerobj
+    //                     })
+    //                     console.log(response.data.careerobj)
+    //                 } else {
+    //                     console.log(response.data.error)
+    //                 }
+    //                     this.setState({
+    //                         updateprofile2 : false
+    //                     })
+    //                     console.log(this.state.updateprofile2)
+    //             })
+    //     }
 
-    updateInfo = (e) => {
-        this.setState(currentState =>({
-            updateprofile1: !currentState.updateprofile1
-        }))
-        console.log(this.state.updateprofile1)
-    }
+    // updateInfo = (e) => {
+    //     this.setState(currentState =>({
+    //         updateprofile1: !currentState.updateprofile1
+    //     }))
+    //     console.log(this.state.updateprofile1)
+    // }
 
-    updateInfo2 = (e) => {
-        this.setState(currentState =>({
-            updateprofile2: !currentState.updateprofile2
-        }))
-        console.log(this.state.updateprofile2)
-    }
+    // updateInfo2 = (e) => {
+    //     this.setState(currentState =>({
+    //         updateprofile2: !currentState.updateprofile2
+    //     }))
+    //     console.log(this.state.updateprofile2)
+    // }
 
-    profile2SaveButton = e =>{
-        this.setState(currentState =>({
-            profile2focus : !currentState.profile2focus
-        }))
-        console.log(this.state.profile2focus)
-    }
+    // profile2SaveButton = e =>{
+    //     this.setState(currentState =>({
+    //         profile2focus : !currentState.profile2focus
+    //     }))
+    //     console.log(this.state.profile2focus)
+    // }
 
-    deleteSkill = e =>{
-        let data = {};
-        let skillstr = "";
-        let tempskillSet = this.state.skillSet;
+    // deleteSkill = e =>{
+    //     let data = {};
+    //     let skillstr = "";
+    //     let tempskillSet = this.state.skillSet;
 
-        tempskillSet.splice(e,1);
+    //     tempskillSet.splice(e,1);
 
-        skillstr = tempskillSet.toString();
+    //     skillstr = tempskillSet.toString();
         
-        console.log(skillstr)
-                data = {
-                    type:'skillSet',
-                    studentId:this.state.studentId,
-                    skillSet:skillstr
-                };
-            //set the with credentials to true
-                axios.defaults.withCredentials = true;
+    //     console.log(skillstr)
+    //             data = {
+    //                 type:'skillSet',
+    //                 studentId:this.state.studentId,
+    //                 skillSet:skillstr
+    //             };
+    //         //set the with credentials to true
+    //             axios.defaults.withCredentials = true;
     
-            //make a post request with the user data
-                axios.post(environment.baseUrl+'/student/profile', data)
-                .then(response => {
-                    console.log(response.data)
-                    if (response.data.result) {
-                        this.setState({
-                            skillSet: tempskillSet
-                        })
-                        console.log(response.data.skillSet)
-                    } else {
-                        console.log(response.data.error)
-                    }
-                })
-    }
+    //         //make a post request with the user data
+    //             axios.post(environment.baseUrl+'/student/profile', data)
+    //             .then(response => {
+    //                 console.log(response.data)
+    //                 if (response.data.result) {
+    //                     this.setState({
+    //                         skillSet: tempskillSet
+    //                     })
+    //                     console.log(response.data.skillSet)
+    //                 } else {
+    //                     console.log(response.data.error)
+    //                 }
+    //             })
+    // }
 
-    addSkill = (e)=>{
-        let data = {}
-        let tempskillSet = this.state.skillSet;
-        let skillstr = "";
-        if (tempskillSet)
-            tempskillSet.push(this.state.skill)
-        else
-            tempskillSet = [this.state.skill]
+    // addSkill = (e)=>{
+    //     let data = {}
+    //     let tempskillSet = this.state.skillSet;
+    //     let skillstr = "";
+    //     if (tempskillSet)
+    //         tempskillSet.push(this.state.skill)
+    //     else
+    //         tempskillSet = [this.state.skill]
             
-        skillstr = tempskillSet.toString();
+    //     skillstr = tempskillSet.toString();
 
-        data = {
-            type:'skillSet',
-            studentId:this.state.studentId,
-            skillSet:skillstr
-        };
-        console.log(data)
-    //set the with credentials to true
-        axios.defaults.withCredentials = true;
+    //     data = {
+    //         type:'skillSet',
+    //         studentId:this.state.studentId,
+    //         skillSet:skillstr
+    //     };
+    //     console.log(data)
+    // //set the with credentials to true
+    //     axios.defaults.withCredentials = true;
 
-    //make a post request with the user data
-        axios.post(environment.baseUrl+'/student/profile', data)
-        .then(response => {
-            console.log(response.data)
-            if (response.data.result) {
-                this.setState({
-                    skillSet: tempskillSet
-                })
-                console.log(this.state.skillSet)
-            } else {
-                console.log(response.data.error)
-            }
-        })
+    // //make a post request with the user data
+    //     axios.post(environment.baseUrl+'/student/profile', data)
+    //     .then(response => {
+    //         console.log(response.data)
+    //         if (response.data.result) {
+    //             this.setState({
+    //                 skillSet: tempskillSet
+    //             })
+    //             console.log(this.state.skillSet)
+    //         } else {
+    //             console.log(response.data.error)
+    //         }
+    //     })
 
-    }
+    // }
 
     render() {
         //redirect based on successful login
@@ -467,103 +448,17 @@ class Profile extends Component {
         let experience1 = null;
         let saveButton = false;
         let career_obj = null;
-        if (!cookie.load('studentcookie')) {
-            redirectVar = <Redirect to='/student/login' />
+        let profile1_props = null;
+        // if (!cookie.load('studentcookie')) {
+        //     redirectVar = <Redirect to='/student/login' />
 
-        }
+        // }
 
         //Profile 1 render update
-        if (!this.state.updateprofile1) {
-            profile1 = (
-                <CardContent   >
-                    <div class="row" style={{ textAlign: '-webkit-right' }}>
-                        <IconButton onClick={this.updateInfo} style={{ textAlign: "right" }}><EditOutlinedIcon color='primary' /></IconButton>
-                    </div>
-                    <div class="row" style={{ textAlign: '-webkit-center' }}>
-                        <Avatar src={this.state.profilepic1} style={{ width: '104px', height: '104px', borderRadius: '50%', textAlign: 'center' }}><h1>{this.state.firstname[0] + this.state.lastname[0]}</h1></Avatar>
-                        <h1 style={{ fontSize: '30px' }}>{this.state.firstname + " " + this.state.lastname}</h1>
-                        {(this.state.college)?(<h4 >{this.state.college}</h4>):<div></div>}
-                        {(this.state.college)?(<h4 style={{ fontSize: '15px' }}>{this.state.degree + "," + this.state.major}</h4>):(<div></div>)}
-                        {(this.state.college)?(<Typography color="textSecondary">
-                            <h4 >{this.state.degree + " • GPA:" + this.state.cgpa_preferred}</h4>
-                        </Typography>):<div></div>}
-                    </div>
-                </CardContent>
-            )
-        } else {
-            profile1 = (
-                <CardContent style={{ textAlign: '-webkit-center' }} >
-                    {/* <Avatar style={{ width: '104px', height: '104px', borderRadius: '50%', textAlign: 'center' }}><h1>{this.state.firstname[0] + this.state.lastname[0]}</h1></Avatar> */}
-                    {/* <Avatar style={{ width: '104px', height: '104px', borderRadius: '50%', textAlign: 'center' }}></Avatar> */}
-                    <div class="upload-btn-img">
-                            <img src={this.state.emptyprofilepic} class="img-thumbnail p-0 m-0" alt="Student"/>
-                            <input type="file" name="profilepic" onChange={this.showProfilepic} />
-                    </div>
-                    <div class="login-form">
-                        <div class= "col-md-6">
-                        <p style = {{fontSize:'10px',fontWeight: 'bold'}}>Preffered Name</p>
-                        <TextField onChange={this.inputChangeHandler} id="preferred" name="profile1_preferred" value={this.state.profile1_preferred} variant="outlined" class='form control' size = 'small' style={{ marginBottom: '5px' }} />
-                        <Button onClick={this.updateInfo} variant="contained" component="span" style={{ marginRight: '5px', backgroundColor: "#E0E0E0", color: 'black' ,width :"100%"}}>
-                            Cancel
-                        </Button>
-                        </div>
-                        <div class= "col-md-6" style={{marginBottom : '10px'}}>
-                        <p style = {{fontSize:'10px',fontWeight: 'bold'}}>Last Name</p>
-                        <TextField onChange={this.inputChangeHandler} id="first" name="profile1_last" value={this.state.profile1_last} variant="outlined" class='form control' size = 'small' style={{ marginBottom: '5px' }} />
-                        <Button onClick={() => this.updateProfile('name')} variant="contained" component="span" style={{ backgroundColor: '#1569E0', color: 'white', width :"100%"}}>
-                            Save
-                        </Button></div>
-                    </div></CardContent>
-            )
-        }
+
 
 //profile2 render update
-        if (!this.state.careerobj) {
-            if (this.state.profile2focus){
-                saveButton = (<Button onClick={() => {this.updateProfilefun2('careerobj')}} variant="contained" component="span" style={{ backgroundColor: '#0D7F02', color: 'white' }}>save</Button>)
-            }
-            profile2 = (<CardContent>
-                <h4 style = {{fontFamily : "Arial",fontWeight:"700", fontSize : '18px'}}>My Journey</h4>
-                <Typography style = {{fontSize : '14px',fontFamily : "Suisse Int'l", color:"#1569E0"}}>What are you passionate about? What are you looking for on Handshake? What are your experiences or skills?</Typography>
-                <div class="login-form">
-                    <textarea onChange = {this.inputChangeHandler} onFocus = {this.profile2SaveButton} onBlur = {this.profile2SaveButton} style = {{padding:"2px", width : "100%",borderRadius:"4px"}} name = "newcareerobj" rows = "4" placeholder = "Type your introduction..."></textarea><br/>
-                    <div style = {{textAlign:"right"}}>
-                    {/* {saveButton} */}
-                    <Button onClick={() => {console.log("save click");this.updateProfilefun2('careerobj')}} variant="contained" component="span" style={{ backgroundColor: '#0D7F02', color: 'white' }}>save</Button>
-                    </div>
-                </div>
-            </CardContent>)
-        }else if(this.state.updateprofile2){
-            profile2 = (<CardContent>
-                <h4 style = {{fontFamily : "Arial",fontWeight:"700", fontSize : '18px'}}>My Journey</h4>
-                <Typography style = {{fontSize : '14px',fontFamily : "Suisse Int'l", color:"#1569E0"}}>What are you passionate about? What are you looking for on Handshake? What are your experiences or skills?</Typography>
-                {console.log("profile2")}
-                {console.log("edit career Objective")}
-                <div class="login-form">
-                <textarea onChange = {this.inputChangeHandler} style = {{padding:"2px", width : "100%",borderRadius:"4px"}} name = "newcareerobj" rows = "4" placeholder = "Type your introduction..."></textarea><br/>
-                <div style = {{textAlign:"right"}}>
-                <Button onClick={this.updateInfo2} variant="contained" component="span" style={{ marginRight: '5px', backgroundColor: '"#E0E0E0"', color: 'black' }}>cancel</Button>
-                <Button onClick={() => this.updateProfilefun2('careerobj')} variant="contained" component="span" style={{ backgroundColor: '#0D7F02', color: 'white' }}>save</Button>
-                </div>
-                </div>
-            </CardContent>)
-        }else{
-            profile2 = (<CardContent>
-                <div class="row" style={{ textAlign: '-webkit-right' }}>
-                        <IconButton onClick={this.updateInfo2} style={{ textAlign: "right" }}><EditOutlinedIcon color='primary' /></IconButton>
-                    </div>
-                    <div class="row" style={{ marginLeft:'5px' }}>
-                <h4 style = {{fontFamily : "Arial",fontWeight:"700", fontSize : '18px'}}>My Journey</h4>
-                {/* <Typography style = {{fontSize : '14px',fontFamily : "Suisse Int'l", color:"#1569E0"}}>What are you passionate about? What are you looking for on Handshake? What are your experiences or skills?</Typography> */}
-                {console.log("profile2")}
-                {console.log("career Objective")}
-                <div>
-                    
-                        <h4 style = {{fontSize:"24px"}}>{this.state.careerobj}</h4>
-                    </div>
-                    </div>
-            </CardContent>)
-        }
+       
 
         if (this.state.editeducation === true || !this.state.educationnotempty)
          {
@@ -659,71 +554,36 @@ class Profile extends Component {
                    </div>
                </div>)
        }
-
-        if (this.state.skillSet){
-            let skillSet = this.state.skillSet;
-            console.log(this.state.skillSet)
-            profile3 = (
-                <div style = {{marginBottom:'10px'}}>
-                    {skillSet.map((data,index)=>{
-                        return(
-                            <Chip
-                              key = {index}
-                              label = {data}
-                              onDelete = {()=>this.deleteSkill(index)}
-                              style = {{marginRight : '8px',marginBottom : '8px', borderRadius : '0px', color:'#575757',fontSize:'13px',lineHeight: '15px',fontWeight: 500}}
-                            />
-                        )
-                    })}
-                </div>
-            )
-        }
-
         if (this.state.authError === true) {
             invalid = <p>Invalid Credentials</p>
         }
-
         return (
             <div style={{ width: "95%", backgroundColor: '#F7F7F7', fontFamily:'Arial'}}>
-                {/*{redirectVar}*/}
                 <div class="container" style={{  backgroundColor: '#F7F7F7' }}>
-                    {/* <div style = {{backgroundColor:#F7F7F7}}> */}
                     <div class="col-md-1">
                     </div>
                     <div class="col-md-3">
                         <div class="row" style={{ marginBottom: '20px', marginRight: '20px'}}>
-                            <Card >
-                                {profile1}
-                            </Card>
+                            <Profile1 profile = {this.state.profiledata}/>
                         </div>
                         <div class="row" style={{ marginBottom: '20px', marginRight: '20px' }}>
-                            <Card>
-                                <CardContent>
-                                    <h1 style = {{fontFamily : "Arial",fontWeight:"550", fontSize : '18px'}}>Skills</h1>
-                                    {profile3 /*skillset*/}
-                                    <div class="login-form">
-                                        <div class = 'col-md-8'>
-                                        <TextField type='text' variant="outlined" class='form control' name='skill' placeholder='Add more skills' size='small' onChange = {this.inputChangeHandler}/>
-                                        </div>
-                                        <Button onClick = {this.addSkill} style={{backgroundColor:'#0d7f02', color:'white',fontSize: '13px', fontWeight: '500', lineHeight: '20px'}}>Add</Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <Skillset profile = {this.state.profiledata.skills} />
                         </div>
                         <div class="row" style={{ marginBottom: '20px', marginRight: '20px' }}>
+                            <PersonalInfo profile = {this.state.profiledata}/>
                         </div>
                     </div>
                     <div class="col-md-7">
                         <div class="row" style={{ marginBottom: '20px' }}>
                             <Card>
-                                {profile2}
+                                <CareerObj profile = {this.state.profiledata.career_objective}/>
                             </Card>
                         </div>
                         <div class="row" style={{ marginBottom: '20px' }}>
                             <Card>
-                                <CardContent>
-                                    {education1}
-                                </CardContent>
+                                {console.log(this.state.profiledata)}
+                                {console.log(this.state.profiledata.education)}
+                                <Education profile = {this.state.profiledata.education}/>
                             </Card>
                         </div>
                         <div class="row" style={{ marginBottom: '20px' }}>
