@@ -27,7 +27,7 @@ const saveDocuments = (modelObject, result,options,callback) => {
 const updateField = (modelObject, id, update, callback) => {
     console.log("update")
     try {
-        modelObject.findOneAndUpdate({ _id  : id}, update, { useFindAndModify: false, new:true},(err,result)=>{
+        modelObject.findOneAndUpdate(id, update, { useFindAndModify: false, new:true},(err,result)=>{
             if (result){
                 console.log(result)
                 callback(err,result)

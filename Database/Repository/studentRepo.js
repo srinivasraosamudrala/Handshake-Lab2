@@ -54,6 +54,28 @@ exports.handle_request = (data, callback) => {
         getRegistrationsStudent(data,(error,result)=>{
             callback(error,result)
         })
+    }else if(data.path == 'applyJob'){
+        applyJob(data,(error,result)=>{
+            callback(error,result)
+        })
+    }else if(data.path == 'getApplicationStudent'){
+        getApplicationStudent(data,(error,result)=>{
+            callback(error,result)
+        })
+    }else if(data.path == 'getStudentDetails'){
+        getStudentDetails(data,(error,result)=>{
+            callback(error,result)
+        })
+    }else if(data.path == 'studentprofilepic'){
+        console.log("in path call")
+        updateStudentProfilePic(data,(error,result)=>{
+            callback(error,result)
+        })
+    }else if(data.path == 'studentProfileUpdate'){
+        console.log("in path call")
+        updateStudentProfile(data,(error,result)=>{
+            callback(error,result)
+        })
     }
 }
 
@@ -302,40 +324,49 @@ exports.skillsetUpdate = (studentDetails,callback) => {
                     })
 }
 
-exports.getStudentDetails = (studentId,callback) => {
-    let result = {}
-    connection.query(studentDBQueries.StudentProfile,studentId,
-        (err, education) => {
-            if (!err){
-                connection.query(studentDBQueries.StudentWorkProfile,studentId,
-                    (err, work) => {
-                        if (!err){
-                            connection.query(studentDBQueries.studentBasicSelect,studentId,
-                         (err, basic) => {
-                             if(!err){
-                            connection.query(studentDBQueries.studentInfoSelect,studentId,
-                                (err, info) => {
-                             if(!err){
-                                connection.query(studentDBQueries.StudentSkillSet,studentId,
-                                    (err,skillset) => {
-                                        result.education = education
-                                        result.work = work
-                                        result.basic = basic
-                                        result.skillset = skillset
-                                        result.info = info
-                                        callback(err,result)})
-                                    }else{
-                                        callback(err,result)}
-                             })}
-                            else{
-                                callback(err,result)
-                            }})
-                        }else{
-                        callback(err,result)
-                        }})
-            }else{
-            callback(err,result)}
-    });
+getStudentDetails = (studentDetails,callback) => {
+    try{
+        query.findDocumentsByQuery(Student.createModel(),{_id:studentDetails.studentId},{applications:0,registrations:0},{runValidators:false},(err,result)=>{
+        console.log(result)
+        callback(err,result)
+        });
+    }
+    catch(error){
+        return callback(error,null)
+    }
+    // let result = {}
+    // connection.query(studentDBQueries.StudentProfile,studentId,
+    //     (err, education) => {
+    //         if (!err){
+    //             connection.query(studentDBQueries.StudentWorkProfile,studentId,
+    //                 (err, work) => {
+    //                     if (!err){
+    //                         connection.query(studentDBQueries.studentBasicSelect,studentId,
+    //                      (err, basic) => {
+    //                          if(!err){
+    //                         connection.query(studentDBQueries.studentInfoSelect,studentId,
+    //                             (err, info) => {
+    //                          if(!err){
+    //                             connection.query(studentDBQueries.StudentSkillSet,studentId,
+    //                                 (err,skillset) => {
+    //                                     result.education = education
+    //                                     result.work = work
+    //                                     result.basic = basic
+    //                                     result.skillset = skillset
+    //                                     result.info = info
+    //                                     callback(err,result)})
+    //                                 }else{
+    //                                     callback(err,result)}
+    //                          })}
+    //                         else{
+    //                             callback(err,result)
+    //                         }})
+    //                     }else{
+    //                     callback(err,result)
+    //                     }})
+    //         }else{
+    //         callback(err,result)}
+    // });
 }
 
 exports.getStudentBasic = (studentId,callback) => {
@@ -380,21 +411,65 @@ exports.getStudentSkillset = (studentId,callback) => {
     });
 }
 
-exports.getApplicationStudent = (studentId,callback) => {
-    connection.query(studentDBQueries.studentGetApplications,
-        studentId,
-        (err,result) => {
+getApplicationStudent = (studentDetails,callback) => {
+    try{
+        query.findDocumentsByLookup(Jobs.createModel(),'companies',{'applications.student_id':ObjectId(studentDetails.studentId)},'company_id','_id','Company',(err,result)=>{
+            console.log(result)
             callback(err,result)
-        })
+            });
+    }
+    catch(err)
+    {
+        callback(err,null)
+    }
+    // connection.query(studentDBQueries.studentGetApplications,
+    //     studentId,
+    //     (err,result) => {
+    //         callback(err,result)
+    //     })
 }
 
-exports.applyJob = (jobdetails,callback) => {
+applyJob = (jobdetails,callback) => {
     console.log(jobdetails)
-    connection.query(studentDBQueries.studentApplyJobs,
-        [jobdetails.studentId,jobdetails.companyId,jobdetails.jobId,"Pending",jobdetails.appliedDate,jobdetails.resume],
-        (err,result) => {
+    // connection.query(studentDBQueries.studentApplyJobs,
+    //     [jobdetails.studentId,jobdetails.companyId,jobdetails.jobId,"Pending",jobdetails.appliedDate,jobdetails.resume],
+    //     (err,result) => {
+    //         callback(err,result)
+    //     })
+    try{
+        let update = {$push: {
+            applications:[
+                    {
+                        student_id: jobdetails.studentId,
+                        status: 'Pending',
+                        applied_date:jobdetails.appliedDate,
+                        resume:jobdetails.resume
+                    }
+            ]
+        }}
+
+        let updateStudent = {$push: {
+            applications:[
+                    {
+                        job_id: jobdetails.jobId
+                    }
+            ]
+        }}
+        query.updateField(Student.createModel(),{_id:ObjectId(jobdetails.studentId)},updateStudent,(err,result)=>{
+            console.log(result)
+            if(result){
+                query.updateField(Jobs.createModel(),{_id:ObjectId(jobdetails.jobId)},update,(err,result)=>{
+                    console.log(result)
+                    callback(err,result)
+                    });
+            }
             callback(err,result)
-        })
+            });
+    }
+    catch(err)
+    {
+        callback(err,null)
+    }
 }
 
 
@@ -462,6 +537,44 @@ getRegistrationsStudent = (studentDetails   ,callback) => {
             console.log(result)
             callback(err,result)
             });
+    }
+    catch(err)
+    {
+        callback(err,null)
+    }
+}
+updateStudentProfilePic = (studentDetails,callback) => {
+    updateStudent = {
+        image:studentDetails.image
+    }
+
+    try{
+        query.updateField(Student.createModel(),{_id:ObjectId(studentDetails.studentId)},updateStudent,(err,result)=>{
+            console.log("post insert")
+            console.log(result)
+            callback(err,result)
+        });
+    }
+    catch(err)
+    {
+        callback(err,null)
+    }
+}
+
+updateStudentProfile = (studentDetails,callback) => {
+    try{
+        let match = null
+        if(!studentDetails.educationId){
+            match = {_id:ObjectId(studentDetails.studentId)}
+        }else{
+            match = {_id:ObjectId(studentDetails.studentId),
+                    'education._id':ObjectId(studentDetails.educationId)}
+        }
+        query.updateField(Student.createModel(),match,studentDetails.update,(err,result)=>{
+            console.log("post insert")
+            console.log(result)
+            callback(err,result)
+        });
     }
     catch(err)
     {
