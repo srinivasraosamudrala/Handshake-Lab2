@@ -80,77 +80,109 @@ router.post('/signup',(req,res) => {
 })
 
 router.post('/profile/',(req,res) => {
-    let body = req.body
-    console.log(body)
-    if (req.body.type == "name"){
-        studentRepo.nameUpdate(body,(error,result) => {
-            if(error)
-                //res.json(error)
-                res.send({'error':error})
-            else
-                res.send({'result':'updated successfully'})
-            })
-    }else if(req.body.type == "careerobj"){
-        console.log(req.body)
-        studentRepo.careerObjUpdate(body,(error,result) => {
-            if(error)
-                //res.json(error)
-                res.send({'error':error})
-            else
-                res.send({'result':'updated successfully'})
-            })
-    }else if(req.body.type == "skillSet"){
-        studentRepo.skillsetUpdate(body,(error,result) => {
-            if(error)
-                res.send({'error':error})
-            else
-                res.send({'result':'updated successfully'})
-        })
-    }else if(req.body.type == "education"){
-        studentRepo.educationUpdate(body,(error,result) => {
-            if(error)
-                //res.json(error)
-                res.send({'error':error})
-            else
-                res.send({'result':'student Education Details updated'})
-            })
-    }else if(req.body.type == "contact"){
-        studentRepo.contactUpdate(body,(error,result) => {
-            if(error)
-                //res.json(error)
-                res.send(error)
-            else
-                res.send('student Contact Details updated')
-            })
-    }else if(req.body.type == "experience"){
-        studentRepo.experienceUpdate(body,(error,result) => {
-            if(error)
-                //res.json(error)
-                res.send({'error':error})
-            else
-                res.send({'result':'student Experience Details updated'})
-            })
-    }else if(req.body.type == "skillset"){
-        studentRepo.skillsetUpdate(body,(error,result) => {
-            if(error)
-                //res.json(error)
-                res.send(error)
-            else
-                res.send('student Skillset Details updated')
-            })
-    }
+
+    req.body.path = 'studentProfileUpdate'
+    kafka.make_request('student-profile',req.body, (err,result) => {
+        console.log('in result');
+        console.log(result);
+        if (err){
+            console.log("Inside err");
+            res.json({'error':err})
+        }else if(result.error){
+            res.json({'error':result.error})
+        }else{
+            console.log("Inside result");
+                console.log(result)
+                res.json(result);
+            }
+    });
+    
+    // if (req.body.type == "name"){
+    //     studentRepo.nameUpdate(body,(error,result) => {
+    //         if(error)
+    //             //res.json(error)
+    //             res.send({'error':error})
+    //         else
+    //             res.send({'result':'updated successfully'})
+    //         })
+    // }else if(req.body.type == "careerobj"){
+    //     console.log(req.body)
+    //     studentRepo.careerObjUpdate(body,(error,result) => {
+    //         if(error)
+    //             //res.json(error)
+    //             res.send({'error':error})
+    //         else
+    //             res.send({'result':'updated successfully'})
+    //         })
+    // }else if(req.body.type == "skillSet"){
+    //     studentRepo.skillsetUpdate(body,(error,result) => {
+    //         if(error)
+    //             res.send({'error':error})
+    //         else
+    //             res.send({'result':'updated successfully'})
+    //     })
+    // }else if(req.body.type == "education"){
+    //     studentRepo.educationUpdate(body,(error,result) => {
+    //         if(error)
+    //             //res.json(error)
+    //             res.send({'error':error})
+    //         else
+    //             res.send({'result':'student Education Details updated'})
+    //         })
+    // }else if(req.body.type == "contact"){
+    //     studentRepo.contactUpdate(body,(error,result) => {
+    //         if(error)
+    //             //res.json(error)
+    //             res.send(error)
+    //         else
+    //             res.send('student Contact Details updated')
+    //         })
+    // }else if(req.body.type == "experience"){
+    //     studentRepo.experienceUpdate(body,(error,result) => {
+    //         if(error)
+    //             //res.json(error)
+    //             res.send({'error':error})
+    //         else
+    //             res.send({'result':'student Experience Details updated'})
+    //         })
+    // }else if(req.body.type == "skillset"){
+    //     studentRepo.skillsetUpdate(body,(error,result) => {
+    //         if(error)
+    //             //res.json(error)
+    //             res.send(error)
+    //         else
+    //             res.send('student Skillset Details updated')
+    //         })
+    // }
 })
 
 router.get('/profile/:studentId',(req,res)=>{
-    studentRepo.getStudentDetails(req.params.studentId,(error,result) => {
-        console.log(req.params.studentId)
-            if(error){
-                console.log(error)
-                return res.json({'error':error})}
-            else{
+    req.body.studentId = req.params.studentId
+    req.body.path = "getStudentDetails"
+    kafka.make_request('student-jobs',req.body, (err,result) => {
+        console.log('in result');
+        console.log(result);
+        if (err){
+            console.log("Inside err");
+            res.json({'error':err})
+        }else if(result.error){
+            res.json({'error':result.error})
+        }else{
+            console.log("Inside result");
                 console.log(result)
-                res.json({'result':result})}
-            })
+                res.json(result);
+            }
+    });
+
+    // studentRepo.getStudentDetails(req.params.studentId,(error,result) => {
+    //     console.log(req.params.studentId)
+    //         if(error){
+    //             console.log(error)
+    //             return res.json({'error':error})}
+    //         else{
+    //             console.log(result)
+    //             res.json({'result':result})}
+    //         })
 })
 
 // router.get('/profile/basic/:studentId',(req,res)=>{
@@ -243,21 +275,39 @@ router.post('/education',(req,res)=>{
 
 router.get('/jobapplications/:studentId',(req,res)=>{
     console.log("response")
-    studentRepo.getApplicationStudent(req.params.studentId,(error,result)=>{
-        if(error){
-            res.json({'error':error})
+    req.body.studentId = req.params.studentId
+    req.body.path = "getApplicationStudent"
+    kafka.make_request('student-jobs',req.body, (err,result) => {
+        console.log('in result');
+        console.log(result);
+        if (err){
+            console.log("Inside err");
+            res.json({'error':err})
+        }else if(result.error){
+            res.json({'error':result.error})
         }else{
-            console.log(result)
-            res.json({'result':result})
-        }   
-    })
+            console.log("Inside result");
+                console.log(result)
+                res.json(result);
+            }
+    });
+    // console.log("response")
+    // studentRepo.getApplicationStudent(req.params.studentId,(error,result)=>{
+    //     if(error){
+    //         res.json({'error':error})
+    //     }else{
+    //         console.log(result)
+    //         res.json({'result':result})
+    //     }   
+    // })
 })
 
 router.post('/applyjob', upload.single('file'), (req,res)=>{
+    req.body.path = "applyJob"
     if (req.file) {
         const fileContent = fs.readFileSync('./public/applications/' + req.body.jobId + req.body.studentId + path.extname(req.file.originalname));
 
-
+        
         const params = {
             Bucket: 'handshakesrinivas',
             Key: req.body.jobId + req.body.studentId + path.extname(req.file.originalname),
@@ -275,14 +325,28 @@ router.post('/applyjob', upload.single('file'), (req,res)=>{
                 resume: data.Location
             }
     console.log(req.body)
-    studentRepo.applyJob(jobDetails,(error,result)=>{
-        if(error){
-            res.json({'error':error})
+    kafka.make_request('student-jobs',jobDetails, (err,result) => {
+        console.log('in result');
+        console.log(result);
+        if (err){
+            console.log("Inside err");
+            res.json({'error':err})
+        }else if(result.error){
+            res.json({'error':result.error})
         }else{
-            console.log(result)
-            res.json({'result':result})
-        }   
-    })
+            console.log("Inside result");
+                console.log(result)
+                res.json(result);
+            }
+    });
+    // studentRepo.applyJob(jobDetails,(error,result)=>{
+    //     if(error){
+    //         res.json({'error':error})
+    //     }else{
+    //         console.log(result)
+    //         res.json({'result':result})
+    //     }   
+    // })
 })}
 });
 
@@ -354,21 +418,56 @@ router.get('/eventregistrations/:studentId',(req,res)=>{
     // })
 })
 
-router.post('/uploadpic', upload.single('profilepic'), async (request, response) => {
+router.post('/uploadpic', upload.single('image'), async (req, response) => {
     try {
-      if (request.file) {
-        const fileContent = fs.readFileSync(`./public/images/${request.body.studentId}${path.extname(request.file.originalname)}`);
+      if (req.file) {
+        const fileContent = fs.readFileSync(`./public/images/${req.body.studentId}${path.extname(req.file.originalname)}`);
         console.log(fileContent)
-        console.log(request.body)
-        console.log(request.body.studentId);
-        const query = 'update mydb.student set profilepic=? where studentId=?';
-        console.log('upload pic')
-        const rows = await connection.query(query, [fileContent, request.body.studentId]);
+        console.log(req.body)
+        console.log(req.body.studentId);
+        const params = {
+            Bucket: 'handshakesrinivas',
+            Key: req.body.studentId + path.extname(req.file.originalname),
+            Body: fileContent,
+            ContentType: req.file.mimetype
+        };
+
+        s3.upload(params, function (err, data) {
+            if (err) {
+                console.log(err.message)
+                return response.status(500).json({ "error": err.message })
+            }
+            console.log(data);
+            let profilepic = {
+                ...req.body,
+                image: data.Location
+            }
+            profilepic.path = 'studentprofilepic'
+            console.log(profilepic)
+            kafka.make_request('student-profile',profilepic, (err,result) => {
+                console.log('in result');
+                console.log(result);
+                if (err){
+                    console.log("Inside err");
+                    response.json({'error':err})
+                }else if(result.error){
+                    response.json({'error':result.error})
+                }else{
+                    console.log("Inside result");
+                        console.log(result)
+                        response.json(result);
+                    }
+            });
+        // const query = 'update mydb.student set profilepic=? where studentId=?';
+        // console.log('upload pic')
+        // const rows = await connection.query(query, [fileContent, request.body.studentId]);
   
-        return response.status(200).json({ "message": "success" });
+        // return response.status(200).json({ "message": "success" });
+    });
       }
     } catch (ex) {
       const message = ex.message ? ex.message : 'Error while uploading image';
+      console.log(ex)
       const code = ex.statusCode ? ex.statusCode : 500;
       return response.status(code).json({ message });
     }
