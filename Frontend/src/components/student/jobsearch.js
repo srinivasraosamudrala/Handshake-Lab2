@@ -104,7 +104,7 @@ class JobSearch extends Component {
             'jobId':jobId,
             'companyId':companyId,
             'studentId':Number(localStorage.getItem('studentId')),
-            'appliedDate': new Date().toISOString().slice(0,9),
+            'appliedDate': new Date().toISOString().slice(0,10),
             'resume':this.state.resume
         }
         await console.log(fdata)
@@ -122,6 +122,8 @@ class JobSearch extends Component {
 
     uploadResume = (companyId,jobId) =>
     {
+        console.log(companyId)
+        console.log(jobId)
         console.log("Resume upload")
         this.setState(currentState =>({
             uploadresume: !currentState.uploadresume,
@@ -165,6 +167,7 @@ class JobSearch extends Component {
 
         if (this.state.joblist) {
             // joblist = (<JobList studentId={this.state.studentId} jobs={this.state.joblist} />)
+            console.log(this.state.joblist)
             let joblist = this.state.joblist
             jobfilter = this.state.jobfilter
             // console.log(jobfilter)
@@ -219,7 +222,7 @@ class JobSearch extends Component {
                             <div class = 'col-md-9'> 
                             <p style={{ fontSize: '16px', fontWeight: '500', color: 'rgba(0,0,0,.8)', position:'relative', top:'-12px',left:'-15px'}}>Applications close on {jobdetailed.deadline}</p></div>
                             <div class = 'col-md-3'>                            
-                            <button class="btn btn-primary" style={{ backgroundColor: '#0d7f02', position:'relative', top:'-18px',border:'0px'}} onClick={()=>this.uploadResume(jobdetailed.companyId,jobdetailed.jobId)}>Quick Apply</button></div>
+                            <button class="btn btn-primary" style={{ backgroundColor: '#0d7f02', position:'relative', top:'-18px',border:'0px'}} onClick={()=>this.uploadResume(jobdetailed.company_id,jobdetailed._id)}>Quick Apply</button></div>
                             <Dialog
                                 aria-labelledby="simple-modal-title"
                                 aria-describedby="simple-modal-description"
@@ -233,7 +236,7 @@ class JobSearch extends Component {
                                     <div className='col-md-8'>
                                     </div>
                                     <div className='col-md-4'>
-                                        <button onClick={()=>{this.applyJob(jobdetailed.jobId,jobdetailed.companyId)}} class="btn btn-primary" style={{backgroundColor:'#1569E0',borderRadius:'5px'}}>Apply</button>
+                                        <button onClick={()=>{this.applyJob(jobdetailed._id,jobdetailed.company_id)}} class="btn btn-primary" style={{backgroundColor:'#1569E0',borderRadius:'5px'}}>Apply</button>
                                     </div>
                                 </DialogContent>                  
                                 </div>

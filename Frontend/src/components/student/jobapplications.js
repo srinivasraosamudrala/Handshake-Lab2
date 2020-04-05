@@ -41,18 +41,19 @@ class JobApplications extends Component {
         this.setState({ studentId: localStorage.getItem('studentId') })
         axios.get(environment.baseUrl+'/student/jobapplications/' + localStorage.getItem('studentId'))
             .then((response) => {
-                if (response.data.result.length>0) {
-                    var base64Flag = 'data:image/jpeg;base64,';
-                    response.data.result.map((student) => {
-                        console.log("profile")
-                        if (student.profilepic!== null) {
-                            var imgstring = this.arrayBufferToBase64(student.profilepic.data);
-                             student.profilepic = base64Flag + imgstring
-                        }
-                    } )
+                if (response.data.length>0) {
+                //     var base64Flag = 'data:image/jpeg;base64,';
+                //     response.data.result.map((student) => {
+                //         console.log("profile")
+                //         if (student.profilepic!== null) {
+                //             var imgstring = this.arrayBufferToBase64(student.profilepic.data);
+                //              student.profilepic = base64Flag + imgstring
+                //         }
+                //     } )
                 this.setState({
-                    applications: response.data.result,
+                    applications: response.data,
                 });
+                console.log(response.data)
             }
             })
     }
@@ -63,7 +64,7 @@ class JobApplications extends Component {
         if (applications){
             if (this.state.status){
                 applications=applications.filter((app) => {
-                    return this.state.status.indexOf(app.status) > -1
+                    return this.state.status.indexOf(app.applications[0].status) > -1
                 })
             }
             jobapplications = (
@@ -77,9 +78,9 @@ class JobApplications extends Component {
                         </div>
                         <div class="col-md-9" style={{marginBottom:'16px'}}>
                         <div style={{fontSize: '16px', fontWeight: '700' }}>{app.title}</div>
-                        <div style={{fontSize: '16px', fontWeight: '500' }}>{app.name}</div>
-                        <div style={{fontSize: '16px', fontWeight: '500'}}>{"status:" + app.status}</div>
-                        <div>Applied {app.applieddate} -Applications close {app.deadline.slice(0,10)}</div></div>
+                        <div style={{fontSize: '16px', fontWeight: '500' }}>{app.Company[0].name}</div>
+                        <div style={{fontSize: '16px', fontWeight: '500'}}>{"status:" + app.applications[0].status}</div>
+                        <div>Applied on {app.applications[0].applied_date} - Applications close on {app.deadline.slice(0,10)}</div></div>
                     </CardContent>
                 </Card>)
                 })}
@@ -98,7 +99,6 @@ class JobApplications extends Component {
                     <div style={{fontWeight:'550',fontSize:'13px',padding:'16px'}}>Status</div>
                     <select id="status" name="status" style = {{width:"80%",fontSize:'13px',marginLeft:'16px'}} onChange={this.statusFilter} >
                         <option value="" disabled selected>+ Add Status</option>
-                        <option value="Applied">Applied</option>
                         <option value="Pending">Pending</option>
                         <option value="Reviewed">Reviewed</option>
                         <option value="Declined">Declined</option>
