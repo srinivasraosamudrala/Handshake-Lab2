@@ -588,9 +588,7 @@ class Profile extends Component {
                         </div>
                         <div class="row" style={{ marginBottom: '20px' }}>
                             <Card>
-                                <CardContent>
-                                    {experience1}
-                                </CardContent>
+                                <Experience profile = {this.state.profiledata.experience}/>
                             </Card>
                         </div>
                     </div>

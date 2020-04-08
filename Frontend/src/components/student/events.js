@@ -1,14 +1,10 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import cookie from 'react-cookies';
-import { Redirect } from 'react-router';
 import axios from 'axios';
 import '../../App.css';
 import StudentNav from './studentNavbar';
-import { Card, CardContent, Button, IconButton, InputBase, Dialog } from '@material-ui/core/';
-import Icon from '@material-ui/core/Icon';
-import SearchIcon from '@material-ui/icons/Search';
-import JobList from './joblist';
+import { Card, CardContent, TablePagination} from '@material-ui/core/';
 import emptyPic from '../../images/empty-profile-picture.png';
 import {environment} from '../../Utils/constants'
 
@@ -26,12 +22,13 @@ class Events extends Component {
             appiledJob:[],
             emptyprofilepic:emptyPic,
             studentedu:"",
-            showalert:false
+            showalert:false,
+            rowsPerPage:5,
+            page:0
         }
         this.inputChangeHandler = this.inputChangeHandler.bind(this);
         this.showEvent = this.showEvent.bind(this);
         this.registerEvent = this.registerEvent.bind(this)
-
     }
 
     inputChangeHandler = (e) => {
@@ -49,6 +46,20 @@ class Events extends Component {
         })
 
     }
+
+    handleChangePage = (event, newPage) => {
+        this.setState({
+            page:newPage
+        })
+      };
+    
+    handleChangeRowsPerPage = (event) => {
+        let rowsPerPage = parseInt(event.target.value, 10)
+        this.setState({
+            page:0,
+            rowsPerPage:rowsPerPage
+        })
+      };
 
 
     registerEvent = (eventId,companyId,eligibility) => {
@@ -122,7 +133,7 @@ class Events extends Component {
             if (namesearch.length>0)
             {
                 eventlist = eventlist.filter((event) => {
-                    return (event.eventname.indexOf(namesearch) > -1)
+                    return (event.event_name.indexOf(namesearch) > -1 || event.Company[0].name.indexOf(namesearch) > -1)
                 })
             }
         if (this.state.showalert === true){
@@ -131,7 +142,8 @@ class Events extends Component {
             if (eventlist.length > 0) {
                 events = (
                     <div>
-                        {eventlist.map((event, index) => {
+                        {eventlist.slice(this.state.page * this.state.rowsPerPage, this.state.page * this.state.rowsPerPage + this.state.rowsPerPage).map((event,index) => {
+                        // {eventlist.map((event, index) => { 
                             return (<div >
                                 <Link onClick={() => this.showEvent(index)} style={{ color: 'rgba(0, 0, 0, 0.8)' }}>
                                     <p style={{ fontSize: '16px', fontWeight: '700' }}>{event.event_name}</p>
@@ -141,6 +153,20 @@ class Events extends Component {
                             </div>
                             )
                         })}
+                        <TablePagination
+                                rowsPerPageOptions={[1,2,5, 10, 25, { label: 'All', value: -1 }]}
+                                colSpan={3}
+                                count={eventlist.length}
+                                rowsPerPage={this.state.rowsPerPage}
+                                page={this.state.page}
+                                // SelectProps={{
+                                //     inputProps: { 'aria-label': 'rows per page' },
+                                //     native: true,
+                                // }}
+                                onChangePage={this.handleChangePage}
+                                onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                // style={{fontSize:'2px'}}
+                                />
                     </div>
                 )
                 eventdetailed = eventlist[this.state.eventindex]
@@ -177,7 +203,7 @@ class Events extends Component {
                 </Card>
                 <div style={{ paddingTop: '20px' }}>
                     <div class="col-md-4" style={{ paddingRight: '16x' }}>
-                        <Card><CardContent>{events}</CardContent></Card>
+                        <Card style={{width : '101%'}}><CardContent>{events}</CardContent></Card>
 
                     </div>
                     <div class="col-md-8" style={{ paddingRight: '10px' }}>

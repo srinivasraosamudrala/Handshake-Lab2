@@ -1,9 +1,7 @@
 import React,{Component} from 'react';
-import {Link} from 'react-router-dom';
 import cookie from 'react-cookies';
-import {Redirect} from 'react-router';
 import StudentNav from './studentNavbar';
-import { Card, CardContent, Button, IconButton, InputBase, Avatar } from '@material-ui/core/';
+import { Card, CardContent, TablePagination} from '@material-ui/core/';
 import axios from 'axios';
 import emptyPic from '../../images/empty-profile-picture.png';
 import {environment} from '../../Utils/constants'
@@ -18,10 +16,26 @@ class JobApplications extends Component {
             jobindex: 0,
             jobfilter: [],
             status:"",
-            emptyprofilepic:emptyPic
+            emptyprofilepic:emptyPic,
+            rowsPerPage:5,
+            page:0
         }
         this.statusFilter = this.statusFilter.bind(this)
     }
+
+    handleChangePage = (event, newPage) => {
+        this.setState({
+            page:newPage
+        })
+      };
+    
+    handleChangeRowsPerPage = (event) => {
+        let rowsPerPage = parseInt(event.target.value, 10)
+        this.setState({
+            page:0,
+            rowsPerPage:rowsPerPage
+        })
+      };
 
     statusFilter(e){
         console.log(e)
@@ -69,7 +83,8 @@ class JobApplications extends Component {
             }
             jobapplications = (
                 <div>
-                {applications.map((app, index) => {
+                    {applications.slice(this.state.page * this.state.rowsPerPage, this.state.page * this.state.rowsPerPage + this.state.rowsPerPage).map((app,index) => {
+                // {applications.map((app, index) => {
                     
                 return (<Card style={{marginBottom:'20px'}}>
                     <CardContent>
@@ -84,6 +99,19 @@ class JobApplications extends Component {
                     </CardContent>
                 </Card>)
                 })}
+                <div class='row'>
+                <div class='col-md-7'></div>
+                <TablePagination
+                                rowsPerPageOptions={[2, 5, 10, 25, { label: 'All', value: -1 }]}
+                                colSpan={3}
+                                count={applications.length}
+                                rowsPerPage={this.state.rowsPerPage}
+                                page={this.state.page}
+                                onChangePage={this.handleChangePage}
+                                onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                style={{}}
+                                />
+                </div>
                 </div>
         )}
 

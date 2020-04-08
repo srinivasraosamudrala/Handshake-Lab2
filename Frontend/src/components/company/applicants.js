@@ -104,22 +104,9 @@ class ViewApplicants extends Component {
                 console.log("in frontend after response");
                 console.log(response.data.result)
                 if (response.data.result) {
-                        var base64Flag = 'data:image/jpeg;base64,';
-                        response.data.result.map((student,index) => {
-                            console.log("profile")
-                            if (student.profilepic!== null) {
-                                var imgstring = this.arrayBufferToBase64(student.profilepic.data);
-                                 student.profilepic = base64Flag + imgstring
-                                 console.log(student.profilepic)
-                            }
-                            console.log(student.profilepic)
-                        } )
                     this.setState({
                         dataRetrieved: true,
-                        stuData: response.data.result,
-                        // name: response.data.rows[0].name,
-                        // email: response.data.rows[0].email,
-                        // phone: response.data.rows[0].phone
+                        stuData: response.data.result
                     });
                   console.log(this.state.stuData)
                 } else if (response.data.error) {
@@ -189,7 +176,7 @@ class ViewApplicants extends Component {
                                                 <div key={data.stud_id} style={{padding:'10px 0px 10px 50px'}}>
                                                 <div className="row App-align">
                                                 <div className="col-md-1">
-                                                    <img src={data.profilepic?data.profilepic:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',top:'20px',left:'-30px'}} alt='Profile'/>
+                                                    <img src={data.studentDetails[0].image?data.studentDetails[0].image:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',top:'20px',left:'-30px'}} alt='Profile'/>
                                                 </div>
                                                 <div className="col-md-8" style={{ fontSize: "23px", color: "#1569E0",marginLeft:"-10px" }}><Link onClick = {()=>(this.viewProfile(data.stud_id))}>{data.firstName+ " " +data.lastName}</Link>
                                                 <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-envelope" style={{ color: "#1569E0" }}></span> {data.email}</div>    

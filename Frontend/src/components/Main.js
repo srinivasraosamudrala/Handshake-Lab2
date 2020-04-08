@@ -20,6 +20,8 @@ import studentEvents from './student/events'
 import studentEventRegistrations from './student/registrations'
 import companyApplicants from './company/applicants'
 import viewStudents from './student/viewstudent'
+import studentConversations from './student/messages'
+import companyConversations from './company/messages'
 
 
 
@@ -42,6 +44,7 @@ class Main extends Component{
                     <Route path="/company/studentsearch" component={companyStudents}/>
                     <Route path="/company/profile" component={companyProfile}/>
                     <Route path="/company/applicants/:jobId" component={companyApplicants}/>
+                    <Route path="/company/conversations" component = {companyConversations}/> 
                     {/* <Route path="/student/" component={studentNav}/> */}
                     <Route path="/student/jobs/search" component={studentJobSearch}/>
                     <Route path="/student/jobs/applications" component = {studentJobApplications}/>
@@ -49,6 +52,7 @@ class Main extends Component{
                     <Route path="/student/events" component = {studentEvents}/>
                     <Route path="/student/event/registrations" component = {studentEventRegistrations}/>
                     <Route path="/student/viewStudent" component = {viewStudents}/>
+                    <Route path="/student/conversations" component = {studentConversations}/> 
             </div>
         )
     }

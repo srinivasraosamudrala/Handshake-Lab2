@@ -59,6 +59,15 @@ class StudentNav extends Component {
                     </div>
                 );
             }
+            else if(this.props.comp === "messages"){
+                navUpdate = (
+                    <div>
+                        <ul class="nav navbar-nav">
+                            <h2 style={{color:"white",fontSize:'20px',fontWeight:'500'}}>Messages</h2>
+                        </ul>
+                    </div>
+                );
+            }
             else if(this.props.comp === "events"){
                 navUpdate = (
                     <div>

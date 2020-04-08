@@ -53,6 +53,7 @@ class Navbar extends Component {
                         <li class = 'active'><Link to="/company/home">Jobs</Link></li>
                         <li class='navli'><Link to="/company/events">Events</Link></li>
                         <li class='navli'><Link to="/student/studentsearch">Students</Link></li>
+                        <li class='navli'><Link to="/company/conversations">Messages</Link></li>
                         <li class='navli'><Link to="/company/profile">Profile</Link></li>
                         <li class='navli'><Link to="/" onClick = {this.handleLogout}><span class="glyphicon glyphicon-user"></span>Logout</Link></li> 
                     </ul>
@@ -73,6 +74,7 @@ class Navbar extends Component {
                         <li class='navli'><Link to="/student/jobs/search">Jobs</Link></li>
                         <li class='navli'><Link to="/student/events">Events</Link></li>
                         <li class='navli'><Link to="/student/studentsearch">Students</Link></li>
+                        <li class='navli'><Link to="/student/conversations">Messages</Link></li>
                         <li class='navli'><Link to="/student/profile">Profile</Link></li>
                         <li class='navli'><Link to="/" onClick = {this.handleLogout}><span class="glyphicon glyphicon-user"></span>Logout</Link></li>
                 </navitem>

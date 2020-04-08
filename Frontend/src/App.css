@@ -172,8 +172,9 @@
     position: relative;
     overflow: hidden;
     display: inline-block;
-    height: 110px;
-    width:110px;
+    height: 104px;
+    width:104px;
+    border-radius: 50%;
 }
 
 .upload-btn-img input[type=file] {
@@ -190,7 +191,6 @@
     -moz-transition: opacity .25s ease-in-out;
     -webkit-transition: opacity .25s ease-in-out;
     cursor: pointer;
-    width: 70; height: 70; 
     object-fit:cover;
 }
 

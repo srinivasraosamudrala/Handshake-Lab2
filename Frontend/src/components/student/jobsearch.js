@@ -1,14 +1,11 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import cookie from 'react-cookies';
-import { Redirect } from 'react-router';
 import axios from 'axios';
 import '../../App.css';
 import StudentNav from './studentNavbar';
-import { Card, CardContent, Button, IconButton, InputBase, TextField, Dialog, DialogContent} from '@material-ui/core/';
-import Icon from '@material-ui/core/Icon';
-import SearchIcon from '@material-ui/icons/Search';
-import JobList from './joblist';
+import { Card, CardContent, Button, Dialog, DialogContent, TablePagination, Avatar} from '@material-ui/core/';
+import CategoryIcon from '@material-ui/icons/Category';
 import emptyPic from '../../images/empty-profile-picture.png';
 import {environment} from '../../Utils/constants'
 
@@ -30,7 +27,9 @@ class JobSearch extends Component {
             resume:null,
             currentjobId:0,
             currentcompanyId:0,
-            emptyprofilepic:emptyPic
+            emptyprofilepic:emptyPic,
+            rowsPerPage:5,
+            page:0
         }
         this.inputChangeHandler = this.inputChangeHandler.bind(this);
         this.showJob = this.showJob.bind(this);
@@ -39,6 +38,20 @@ class JobSearch extends Component {
         this.uploadResume = this.uploadResume.bind(this);
         this.getResume = this.getResume.bind(this);
     }
+
+    handleChangePage = (event, newPage) => {
+        this.setState({
+            page:newPage
+        })
+      };
+    
+    handleChangeRowsPerPage = (event) => {
+        let rowsPerPage = parseInt(event.target.value, 10)
+        this.setState({
+            page:0,
+            rowsPerPage:rowsPerPage
+        })
+      };
 
     inputChangeHandler = (e) => {
         const value = e.target.value
@@ -138,15 +151,6 @@ class JobSearch extends Component {
         axios.get(environment.baseUrl+'/student/jobsearch/' + localStorage.getItem('studentId'))
             .then((response) => {
                 if (response.data.length>0) {
-                    // console.log(response.data[1].Company[0].name)
-                    // var base64Flag = 'data:image/jpeg;base64,';
-                    // response.data.map((job,index) => {
-                    //     console.log("profile")
-                    //     // if (job.Company[0].image!== null) {
-                    //     //     var imgstring = this.arrayBufferToBase64(job.Company[0].image);
-                    //     //     job.Company[0].image = base64Flag + imgstring
-                    //     // }
-                    // } )
                     this.setState({
                         joblist: response.data
                     })
@@ -193,12 +197,15 @@ class JobSearch extends Component {
             if (joblist.length > 0) {
                 jobs = (
                     <div>
-                        {joblist.map((job, index) => {
+                        {joblist.slice(this.state.page * this.state.rowsPerPage, this.state.page * this.state.rowsPerPage + this.state.rowsPerPage).map((job,index) => {
+                            //{joblist.map((job, index) => {
                             return (<div >
                                 <Link onClick={() => this.showJob(index)} style={{ color: 'rgba(0, 0, 0, 0.8)' }}>
+                                    <div class="col-md-2" style={{marginTop:'10px'}}><Avatar src={job.Company[0].image?job.Company[0].image:this.state.emptyprofilepic} style={{height:'70px', width:'70px',borderRadius:'0px',position:'relative',left:'-20px'}} >DP</Avatar></div>
+                                    <div class="col-md-10" style={{marginBottom:'16px'}}>
                                     <p style={{ fontSize: '16px', fontWeight: '700' }}>{job.title}</p>
                                     <p style={{ fontSize: '16px', fontWeight: '400' }}>{job.Company[0].name}-{job.location}</p>
-                                    <p style={{ fontSize: '14px', fontWeight: '400' }}>{job.category}</p>
+                                    <p style={{ fontSize: '14px', fontWeight: '400' }}>{job.category}</p></div>
                                     <hr style = {{width:'200%', position:"relative", left:"-50px"}}></hr>
                                     {/* <svg>
                                         <line x1="0" y1="0" x2="300" y2="0" style={{stroke:'rgb(255,0,0)',strokeWidth:'3'}} />
@@ -207,16 +214,36 @@ class JobSearch extends Component {
                             </div>
                             )
                         })}
+                        <TablePagination
+                                rowsPerPageOptions={[1,2,5, 10, 25, { label: 'All', value: -1 }]}
+                                colSpan={3}
+                                count={joblist.length}
+                                rowsPerPage={this.state.rowsPerPage}
+                                page={this.state.page}
+                                // SelectProps={{
+                                //     inputProps: { 'aria-label': 'rows per page' },
+                                //     native: true,
+                                // }}
+                                onChangePage={this.handleChangePage}
+                                onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                // style={{fontSize:'2px'}}
+                                />
                     </div>
                 )
                 jobdetailed = joblist[this.state.jobindex]
                 detailedjob = (
                     <div>
-                    <div style={{float:"left", position:'relative',left:'10px',top:'-20px'}}><img src={jobdetailed.profilepic?jobdetailed.profilepic:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',top:'20px',left:'-30px'}} alt='Profile'/></div>
+                    <div style={{float:"left", position:'relative',left:'10px',top:'-20px'}}><img src={jobdetailed.image?jobdetailed.image:this.state.emptyprofilepic} height='104px' width='104px' style={{ position:'relative',top:'20px',left:'-30px'}} alt='Profile'/></div>
                      <div><p style={{ fontSize: '24px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{jobdetailed.title}</p>
                         <p style={{ fontSize: '18px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{jobdetailed.Company[0].name}</p>
-                        <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>{jobdetailed.category}</p>
-                        <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>{jobdetailed.location}</p>
+                        <div class="row">
+                                <div class="col-md-3" style={{ padding: "0px" }}>
+                                    <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-map-marker" style={{ color: "#1569E0" }}></span> {jobdetailed.location}</div>
+                                </div> <div class="col-md-3" style={{ padding: "0px" }}>
+                                    <div style={{ fontSize: "13px" }}><span style={{ color: "#1569E0" }}><CategoryIcon/></span> {jobdetailed.category}</div>
+                                </div> <div class="col-md-3" style={{ padding: "0px" }}>
+                                    <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-usd" style={{ color: "#1569E0" }}></span> {jobdetailed.salary + " per hour"}</div>
+                        </div></div>
                         <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>Posted on {jobdetailed.posting_date}</p></div>
                         <div style={{ border: 'Solid 1px', borderRadius: '5px', padding: '30px', marginBottom: '24px' }}>
                             <div class = 'col-md-9'> 
@@ -274,7 +301,7 @@ class JobSearch extends Component {
                 </Card>
                 <div style={{ padding: '24px 0px 16px' }}>
                     <div class="col-md-4" style={{ paddingRight: '16px' }}>
-                        <Card><CardContent>{jobs}</CardContent></Card>
+                        <Card style ={{width:'101%'}}><CardContent>{jobs}</CardContent></Card>
 
                     </div>
                     <div class="col-md-8" style={{ padding: '0px' }}>

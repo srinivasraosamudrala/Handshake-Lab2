@@ -153,7 +153,7 @@ class Profile1 extends Component {
             profile1 = (
                 <CardContent style={{ textAlign: '-webkit-center' }} >
                    <div class="upload-btn-img">
-                            <img src={this.state.image} class="img-thumbnail p-0 m-0" alt="Student"/>
+                            <Avatar src={this.state.image} class="img-thumbnail p-0 m-0" style = {{height:'104px',width:'104px'}} alt="Student"></Avatar>
                             <input type="file" name="image" onChange={this.showProfilepic} />
                     </div>
                     <div class="login-form">

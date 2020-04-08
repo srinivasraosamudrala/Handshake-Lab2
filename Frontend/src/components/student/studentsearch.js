@@ -1,6 +1,6 @@
 import React,{Component} from 'react';
 import StudentNav from './studentNavbar';
-import { Card, CardContent, Button, IconButton, InputBase, Avatar } from '@material-ui/core/';
+import { Card, CardContent, TablePagination, Avatar } from '@material-ui/core/';
 import axios from 'axios';
 import { Link, Redirect } from 'react-router-dom';
 import viewStudent from './viewstudent.js';
@@ -16,13 +16,29 @@ class StudentSearch extends Component {
             namesearch: "",
             majorsearch:"",
             studentprofilepic:[],
-            showStudent:false
+            showStudent:false,
+            rowsPerPage:5,
+            page:0
         }
         
         this.inputChangeHandler = this.inputChangeHandler.bind(this);
         this.statusFilter = this.statusFilter.bind(this);
         this.viewstudent = this.viewstudent.bind(this)
     }
+
+    handleChangePage = (event, newPage) => {
+        this.setState({
+            page:newPage
+        })
+      };
+    
+    handleChangeRowsPerPage = (event) => {
+        let rowsPerPage = parseInt(event.target.value, 10)
+        this.setState({
+            page:0,
+            rowsPerPage:rowsPerPage
+        })
+      };
 
     inputChangeHandler = (e) => {
         const value = e.target.value
@@ -56,23 +72,20 @@ class StudentSearch extends Component {
         this.setState({ studentId: localStorage.getItem('studentId') })
         axios.get(environment.baseUrl+'/student/studentsearch/' + localStorage.getItem('studentId'))
             .then((response) => {
-                // console.log(response.data)
+                console.log(response.data)
+                if (response.data){
+                // var base64Flag = 'data:image/jpeg;base64,';
+                // response.data.result.map((student,index) => {
+                    // console.log("profile")
+                    // if (student.profilepic!== null) {
+                    //     var imgstring = this.arrayBufferToBase64(student.profilepic.data);
+                    //      student.profilepic = base64Flag + imgstring
+                    //      console.log(student.profilepic)
+                    // }
+                    // console.log(student.profilepic)
+                // } )
                 this.setState({
-                    studentsList : response.data.result
-                })
-                if (response.data.result){
-                var base64Flag = 'data:image/jpeg;base64,';
-                response.data.result.map((student,index) => {
-                    console.log("profile")
-                    if (student.profilepic!== null) {
-                        var imgstring = this.arrayBufferToBase64(student.profilepic.data);
-                         student.profilepic = base64Flag + imgstring
-                         console.log(student.profilepic)
-                    }
-                    console.log(student.profilepic)
-                } )
-                this.setState({
-                    studentList:response.data.result
+                    studentsList:response.data
                 })}
                 console.log(this.state.studentsList)
             })
@@ -89,14 +102,12 @@ class StudentSearch extends Component {
             if (this.state.namesearch){
                 console.log(this.state.namesearch)
                 studentList=studentList.filter((student) => {
-                    return (student.firstName.indexOf(this.state.namesearch) > -1 || student.lastName.indexOf(this.state.namesearch) > -1 || ( student.skillset && student.skillset.indexOf(this.state.namesearch)>-1 ))
+                    return (student.first_name.indexOf(this.state.namesearch) > -1 || student.last_name.indexOf(this.state.namesearch) > -1 || ( student.skills.indexOf(this.state.namesearch)>-1 ))
                 })
             }
 
             if (this.state.majorsearch){
-                studentList=studentList.filter((student) => {
-                    if (student.major !== null)
-                    return (student.major.indexOf(this.state.majorsearch) > -1 || student.major.indexOf(this.state.majorsearch) > -1)
+                studentList=studentList.filter((student) => {return (student.education[0].major.indexOf(this.state.majorsearch) > -1)
                 })
             }
             if(this.state.showStudent === true){
@@ -107,20 +118,34 @@ class StudentSearch extends Component {
             students = (
                 <div>
                 {redirectVar}
-                {studentList.map((student, index) => {
+                {studentList.slice(this.state.page * this.state.rowsPerPage, this.state.page * this.state.rowsPerPage + this.state.rowsPerPage).map((student,index) => {
+                // {studentList.map((student, index) => {
                 return (<Card style={{marginBottom:'20px'}}>
                     <CardContent>
-                        <div class="col-md-1" style={{marginTop:'20px'}}><Avatar src={student.profilepic} style={{height:'70', width:'70'}} >{student.firstName[0]+student.lastName[0]}</Avatar></div>
+                        <div class="col-md-2" style={{marginTop:'20px'}}><Avatar src={student.image} style={{height:'104px', width:'104px'}} >{student.first_name[0]+student.last_name[0]}</Avatar></div>
                         <div class="col-md-9" style={{marginBottom:'16px',height:'150px'}}>
-                        <div style={{fontSize: '16px', fontWeight: '700' }}><Link onClick = {()=>{localStorage.setItem('sstudentId',student.studentId);this.viewstudent()}}>{student.firstName+" "+student.lastName}</Link></div>
+                        <div style={{fontSize: '16px', fontWeight: '700' }}><Link onClick = {()=>{localStorage.setItem('sstudentId',student.studentId);this.viewstudent()}}>{student.first_name+" "+student.last_name}</Link></div>
                         {(student.college)?(<div style={{fontSize: '16px', fontWeight: '500' }}>{student.college}</div>):<div></div>}
-                        {(student.college)?(<div style={{fontSize: '16px', fontWeight: '500' }}>{student.degree}</div>):<div></div>}
-                        {(student.college)?(<div style={{fontSize: '16px', fontWeight: '500' }}>{student.major}</div>):<div></div>}
-                        {(student.college)?(<div style={{fontSize: '16px', fontWeight: '500' }}>{student.jobtitle+" at "+student.companyName}</div>):<div></div>}
-                        {(student.college)?(<div style = {{fontSize: '16px', fontWeight: '500'}}>{"Skills:"+ student.skillset}</div>):<div></div>}</div>
+                        {(student.education.length)?(<div style={{fontSize: '16px', fontWeight: '500' }}>{student.education[0].degree}</div>):<div></div>}
+                        {(student.education.length)?(<div style={{fontSize: '16px', fontWeight: '500' }}>{student.education[0].major}</div>):<div></div>}
+                        {(student.experience.length)?(<div style={{fontSize: '16px', fontWeight: '500' }}>{student.experience[0].title+" at "+student.experience[0].company}</div>):<div></div>}
+                        {(student.skills.length)?(<div style = {{fontSize: '16px', fontWeight: '500'}}>{"Skills:"+ student.skills}</div>):<div></div>}</div>
                     </CardContent>
                 </Card>)
-                })} 
+                })}
+                <div class='row'>
+                <div class='col-md-7'></div>
+                <TablePagination
+                                rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                                colSpan={3}
+                                count={studentList.length}
+                                rowsPerPage={this.state.rowsPerPage}
+                                page={this.state.page}
+                                onChangePage={this.handleChangePage}
+                                onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                style={{}}
+                                />
+                </div> 
                 </div>
         )}
 
@@ -143,7 +168,7 @@ class StudentSearch extends Component {
                         </CardContent>
                     </Card>
                 </div>
-                <div style={{ padding: '24px 0px 16px' }}>
+                <div style={{ padding: '0px 0px 10px' }}>
                     <div class="col-md-9" style={{ padding: '0px' }}>
                         {students}
                     </div>
