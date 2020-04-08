@@ -88,6 +88,16 @@ exports.handle_request = (data, callback) => {
                 callback(result)
             }
         })
+    }else if (data.path === 'listApplicants'){
+        listApplicants(data.company_id,(error,result)=>{
+            if(error){
+                console.log(error)
+                callback({'error':error})
+            }else{
+                console.log("result")
+                callback(result)
+            }
+        })
     }
 }
 
@@ -162,28 +172,28 @@ postEvent = (eventDetails,callback) => {
 }
 
 listApplicants = (data,callback)=>{
-    console.log(data)
     try{
-        connection.query(companyDBQueries.listApplicants,[data.id,data.job_id], (err,rows) => {
-            callback(err,rows)
-        });
+        query.findDocumentsByLookup(Jobs.createModel(),'students',{},'applications.student_id','_id','studentDetails',(err,result)=>{
+            console.log(result)
+            callback(err,result)
+            });
     }
-    catch(e)
+    catch(err)
     {
-       callback(e,null)
+        callback(err,null)
     }
 };
 
 listRegistrations = (data,callback)=>{
-    console.log(data)
     try{
-        connection.query(companyDBQueries.listRegistrations,[data.id,data.event_id], (err,rows) => {
-            callback(err,rows)
-        });
+        query.findDocumentsByLookup(Jobs.createModel(),'companies',{},'company_id','_id','Company',(err,result)=>{
+            console.log(result)
+            callback(err,result)
+            });
     }
-    catch(e)
+    catch(err)
     {
-       callback(e,null)
+        callback(err,null)
     }
 };
 

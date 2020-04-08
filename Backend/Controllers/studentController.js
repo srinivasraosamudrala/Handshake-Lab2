@@ -351,15 +351,33 @@ router.post('/applyjob', upload.single('file'), (req,res)=>{
 });
 
 router.get('/studentsearch/:studentId',(req,res)=>{
-    console.log("response")
-    studentRepo.getStudentSearch(req.params.studentId,(error,result)=>{
-        if(error){
-            res.json({'error':error})
+    // console.log("response")
+    // studentRepo.getStudentSearch(req.params.studentId,(error,result)=>{
+    //     if(error){
+    //         res.json({'error':error})
+    //     }else{
+    //         console.log(result)
+    //         res.json({'result':result})
+    //     }   
+    // })
+
+    req.body.studentId = req.params.studentId
+    req.body.path = "studentsearch"
+
+    kafka.make_request('student-profile',req.body, (err,result) => {
+        console.log('in result');
+        console.log(result);
+        if (err){
+            console.log("Inside err");
+            res.json({'error':err})
+        }else if(result.error){
+            res.json({'error':result.error})
         }else{
-            console.log(result)
-            res.json({'result':result})
-        }   
-    })
+            console.log("Inside result");
+                console.log(result)
+                res.json(result);
+            }
+    });
 })
 
 router.get('/events/:studentId',(req,res)=>{

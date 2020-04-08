@@ -153,23 +153,23 @@ router.post('/postevent',(req,res)=>{
 })
 
 router.post('/listApplicants',(req,res)=>{
-    // req.body.path = 'listApplicants'
-    // kafka.make_request('company-jobs',req.body, (err,result) =>{
-    //     if(err)
-    //         res.send({'error':err})
-    //     else{
-    //         res.send({"result":result})}
-    // })
-
-    companyRepo.listApplicants(req.body,(err,result)=>{
-        if (err){
-            console.log(err)
-            res.json({"error":err})
-        }
+    req.body.path = 'listApplicants'
+    kafka.make_request('company-jobs',req.body, (err,result) =>{
+        if(err)
+            res.send({'error':err})
         else{
-            console.log(result)
-            res.json({"result":result})}
-    }) 
+            res.send({"result":result})}
+    })
+    
+    // companyRepo.listApplicants(req.body,(err,result)=>{
+    //     if (err){
+    //         console.log(err)
+    //         res.json({"error":err})
+    //     }
+    //     else{
+    //         console.log(result)
+    //         res.json({"result":result})}
+    // }) 
 })
 
 router.post('/listRegistrations',(req,res)=>{

@@ -72,8 +72,11 @@ exports.handle_request = (data, callback) => {
             callback(error,result)
         })
     }else if(data.path == 'studentProfileUpdate'){
-        console.log("in path call")
         updateStudentProfile(data,(error,result)=>{
+            callback(error,result)
+        })
+    }else if(data.path == 'studentsearch'){
+        getStudentSearch(data,(error,result)=>{
             callback(error,result)
         })
     }
@@ -484,44 +487,53 @@ applyJob = (jobdetails,callback) => {
 //         })
 // }
 
-exports.getStudentSearch = (studentId,callback) => {
-    let result = []
+getStudentSearch = (studentId,callback) => {
+    try{
+        query.findDocumentsByQuery(Student.createModel(),{},{applications:0,registrations:0},{runValidators:false},(err,result)=>{
+        console.log(result)
+        callback(err,result)
+        });
+    }
+    catch(error){
+        return callback(error,null)
+    }
+    // let result = []
 
-    connection.query(studentDBQueries.getStudentId,studentId,
-        (err, student) => {
-            if (!err){
-                student.forEach(stu => {
-                    console.log(stu.studentId)
-                connection.query(studentDBQueries.StudentProfile,stu.studentId,
-                    (err, education) => {
-                        if (!err){
-                            connection.query(studentDBQueries.StudentWorkProfile,stu.studentId,
-                                (err, work) => {
-                                         if(!err){
-                                                    result.push({'studentId':stu.studentId,
-                                                                        'firstName':education[0].firstName,
-                                                                        'lastName':education[0].lastName,
-                                                                        'college':education[0].college,
-                                                                        'major':education[0].major,
-                                                                        'degree':education[0].degree,
-                                                                        'jobtitle':work[0].Title,
-                                                                    'companyName':work[0].companyName,
-                                                                    'profilepic':stu.profilepic,
-                                                                    'skillset':education[0].skillSet
-                                                                })
-                                                    console.log(result)
-                                                }
-                                    else{
-                                    callback(err,result)
-                                    }})
-                        }else{
-                        callback(err,result)}
-                });
-            })
-            setTimeout(()=>callback(err,result),150)
-    }else{
-        callback(err,result)}
-    })
+    // connection.query(studentDBQueries.getStudentId,studentId,
+    //     (err, student) => {
+    //         if (!err){
+    //             student.forEach(stu => {
+    //                 console.log(stu.studentId)
+    //             connection.query(studentDBQueries.StudentProfile,stu.studentId,
+    //                 (err, education) => {
+    //                     if (!err){
+    //                         connection.query(studentDBQueries.StudentWorkProfile,stu.studentId,
+    //                             (err, work) => {
+    //                                      if(!err){
+    //                                                 result.push({'studentId':stu.studentId,
+    //                                                                     'firstName':education[0].firstName,
+    //                                                                     'lastName':education[0].lastName,
+    //                                                                     'college':education[0].college,
+    //                                                                     'major':education[0].major,
+    //                                                                     'degree':education[0].degree,
+    //                                                                     'jobtitle':work[0].Title,
+    //                                                                 'companyName':work[0].companyName,
+    //                                                                 'profilepic':stu.profilepic,
+    //                                                                 'skillset':education[0].skillSet
+    //                                                             })
+    //                                                 console.log(result)
+    //                                             }
+    //                                 else{
+    //                                 callback(err,result)
+    //                                 }})
+    //                     }else{
+    //                     callback(err,result)}
+    //             });
+    //         })
+    //         setTimeout(()=>callback(err,result),150)
+    // }else{
+    //     callback(err,result)}
+    // })
 }
 
 
@@ -564,11 +576,14 @@ updateStudentProfilePic = (studentDetails,callback) => {
 updateStudentProfile = (studentDetails,callback) => {
     try{
         let match = null
-        if(!studentDetails.educationId){
+        if(!studentDetails.educationId && !studentDetails.experienceId){
             match = {_id:ObjectId(studentDetails.studentId)}
-        }else{
+        }else if(studentDetails.educationId){
             match = {_id:ObjectId(studentDetails.studentId),
                     'education._id':ObjectId(studentDetails.educationId)}
+        }else if(studentDetails.experienceId){
+            match = {_id:ObjectId(studentDetails.studentId),
+                'experience._id':ObjectId(studentDetails.experienceId)}
         }
         query.updateField(Student.createModel(),match,studentDetails.update,(err,result)=>{
             console.log("post insert")

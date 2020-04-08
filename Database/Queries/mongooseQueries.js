@@ -1,6 +1,8 @@
-const findDocumentsByQuery = async (modelObject, query, projection, options, callback) => {
+const findDocumentsByQuery = (modelObject, query, projection, options, callback) => {
     try {
-        modelObject.find(query, projection, options,(err,result)=>{callback(err,result)}).lean();
+        modelObject.find(query, projection, options,(err,result)=>{
+        callback(err,result)
+        }).lean();
     } catch (error) {
         callback(err,null)
     }
@@ -42,9 +44,29 @@ const updateField = (modelObject, id, update, callback) => {
         callback(err,null)
     }
 }
-
+const findDocumentsByLookupAsync = async (modelObject,lookupObject, query, local, foreign, aggName) => {
+    try { const agg = [
+            { $match: query },
+            {
+                $lookup:
+                {
+                    from: lookupObject,
+                    localField: local,
+                    foreignField: foreign,
+                    as: aggName
+                },
+            },
+        ];
+        return await modelObject.aggregate(agg).exec();
+    } catch (error) {
+        console.log("Error while saving data:" + error)
+        throw new Error(error);
+    }
+}
 const findDocumentsByLookup = (modelObject,lookupObject, query, local, foreign, aggName, callback) => {
     try {
+    
+
         const agg = [
             { $match: query },
             {
@@ -72,7 +94,17 @@ const findDocumentsByLookup = (modelObject,lookupObject, query, local, foreign, 
     }
 }
 
+const findDocumentsByQueryAsync = async (modelObject, query, projection, options) => {
+    try {
+        return await modelObject.find(query, projection, options).lean();
+    } catch (error) {
+        throw new Error(error);
+    }
+}
+
 module.exports.findDocumentsByQuery = findDocumentsByQuery;
 module.exports.saveDocuments = saveDocuments;
 module.exports.updateField = updateField;
 module.exports.findDocumentsByLookup = findDocumentsByLookup;
+module.exports.findDocumentsByLookupAsync = findDocumentsByLookupAsync;
+module.exports.findDocumentsByQueryAsync = findDocumentsByQueryAsync;

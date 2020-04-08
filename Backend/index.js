@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 var cors = require('cors');
 var student = require('./Controllers/studentController');
 var company = require('./Controllers/companyController');
+var message = require('./Controllers/messageController');
 var connection = require('./dbConnection');
 
 var port = 3001;
@@ -28,6 +29,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/student",student)
 app.use("/company",company)
+app.use("/message",message)
 
 app.listen(port,()=>{
   console.log(`listening to port ${port}`)
