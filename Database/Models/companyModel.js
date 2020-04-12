@@ -15,10 +15,9 @@ const companySchema = new Schema({
     location: { type: String, required: true },
     phone: { type: String, required: false },
     company_description: { type: String, required: false },
-    image: { type: Buffer, required: false }
+    image: { type: String, required: false }
     }, { _id: false }, { collection: 'companies' });
-
-// companySchema.index({email:1}, {unique: true});
+    
 companySchema.plugin(uniqueValidator)
 
 const createModel = function () {

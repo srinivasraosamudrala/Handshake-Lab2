@@ -182,6 +182,7 @@ class Education extends Component {
         }
        
         console.log(data)
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.post(environment.baseUrl+'/student/profile', data)
             .then(response => {
                 console.log("in frontend after response");

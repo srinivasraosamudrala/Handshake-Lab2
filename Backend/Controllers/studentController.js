@@ -8,6 +8,10 @@ var connection = require('../dbConnection');
 var kafka = require('../kafka/client');
 const fs = require('fs');
 const AWS = require('aws-sdk');
+const { checkAuth,studauth } = require("../utils/passport");
+const jwt = require('jsonwebtoken');
+var { secret } = require("../utils/config");
+
 const s3 = new AWS.S3({
 	    accessKeyId:
 	        "AKIAIXZQ2BJZTGBO36DQ",
@@ -37,6 +41,9 @@ const s3 = new AWS.S3({
 router.post('/signup',(req,res) => {
     // let body = req.body
     kafka.make_request('student_signin',req.body, (err,result) => {
+        if (req.body.signup === false){
+            studauth();
+        }
         console.log('in result');
         console.log(result);
         if (err){
@@ -45,9 +52,18 @@ router.post('/signup',(req,res) => {
         }else if(result.error){
             res.json({'error':result.error})
         }else{
-            console.log("Inside result");
-                console.log(result)
-                res.json(result);
+            // console.log("Inside result");
+            //     console.log(result)
+            //     res.json(result);
+            const payload = { _id: result._id, username: req.body.email};
+            console.log(result._id)
+            console.log(req.body.email)
+            const token = jwt.sign(payload, secret, {
+                expiresIn: 1008000
+            });
+                console.log("token is")
+                console.log(token)
+                res.json({"result":"JWT " +token})
             }
     });
 //     if(body.signup == true){
@@ -79,7 +95,7 @@ router.post('/signup',(req,res) => {
 // }
 })
 
-router.post('/profile/',(req,res) => {
+router.post('/profile/',checkAuth,(req,res) => {
 
     req.body.path = 'studentProfileUpdate'
     kafka.make_request('student-profile',req.body, (err,result) => {
@@ -97,66 +113,9 @@ router.post('/profile/',(req,res) => {
             }
     });
     
-    // if (req.body.type == "name"){
-    //     studentRepo.nameUpdate(body,(error,result) => {
-    //         if(error)
-    //             //res.json(error)
-    //             res.send({'error':error})
-    //         else
-    //             res.send({'result':'updated successfully'})
-    //         })
-    // }else if(req.body.type == "careerobj"){
-    //     console.log(req.body)
-    //     studentRepo.careerObjUpdate(body,(error,result) => {
-    //         if(error)
-    //             //res.json(error)
-    //             res.send({'error':error})
-    //         else
-    //             res.send({'result':'updated successfully'})
-    //         })
-    // }else if(req.body.type == "skillSet"){
-    //     studentRepo.skillsetUpdate(body,(error,result) => {
-    //         if(error)
-    //             res.send({'error':error})
-    //         else
-    //             res.send({'result':'updated successfully'})
-    //     })
-    // }else if(req.body.type == "education"){
-    //     studentRepo.educationUpdate(body,(error,result) => {
-    //         if(error)
-    //             //res.json(error)
-    //             res.send({'error':error})
-    //         else
-    //             res.send({'result':'student Education Details updated'})
-    //         })
-    // }else if(req.body.type == "contact"){
-    //     studentRepo.contactUpdate(body,(error,result) => {
-    //         if(error)
-    //             //res.json(error)
-    //             res.send(error)
-    //         else
-    //             res.send('student Contact Details updated')
-    //         })
-    // }else if(req.body.type == "experience"){
-    //     studentRepo.experienceUpdate(body,(error,result) => {
-    //         if(error)
-    //             //res.json(error)
-    //             res.send({'error':error})
-    //         else
-    //             res.send({'result':'student Experience Details updated'})
-    //         })
-    // }else if(req.body.type == "skillset"){
-    //     studentRepo.skillsetUpdate(body,(error,result) => {
-    //         if(error)
-    //             //res.json(error)
-    //             res.send(error)
-    //         else
-    //             res.send('student Skillset Details updated')
-    //         })
-    // }
 })
 
-router.get('/profile/:studentId',(req,res)=>{
+router.get('/profile/:studentId',checkAuth,(req,res)=>{
     req.body.studentId = req.params.studentId
     req.body.path = "getStudentDetails"
     kafka.make_request('student-jobs',req.body, (err,result) => {
@@ -218,7 +177,7 @@ router.get('/profile/:studentId',(req,res)=>{
 //             })
 // })
 
-router.get('/jobsearch/:studentId',(req,res)=>{
+router.get('/jobsearch/:studentId',checkAuth,(req,res)=>{
     req.body.studentId = req.params.studentId
     req.body.path = "getJobdetailsforstudent"
     kafka.make_request('student-jobs',req.body, (err,result) => {
@@ -245,7 +204,7 @@ router.get('/jobsearch/:studentId',(req,res)=>{
     // })
 })
 
-router.post('/education',(req,res)=>{
+router.post('/education',checkAuth,(req,res)=>{
     console.log("education")
     console.log(req.body)
     // studentRepo.getStudentEducation(req.body,(error,result)=>{
@@ -273,7 +232,7 @@ router.post('/education',(req,res)=>{
     });
 })
 
-router.get('/jobapplications/:studentId',(req,res)=>{
+router.get('/jobapplications/:studentId',checkAuth,(req,res)=>{
     console.log("response")
     req.body.studentId = req.params.studentId
     req.body.path = "getApplicationStudent"
@@ -302,7 +261,7 @@ router.get('/jobapplications/:studentId',(req,res)=>{
     // })
 })
 
-router.post('/applyjob', upload.single('file'), (req,res)=>{
+router.post('/applyjob',checkAuth, upload.single('file'), (req,res)=>{
     req.body.path = "applyJob"
     if (req.file) {
         const fileContent = fs.readFileSync('./public/applications/' + req.body.jobId + req.body.studentId + path.extname(req.file.originalname));
@@ -350,7 +309,7 @@ router.post('/applyjob', upload.single('file'), (req,res)=>{
 })}
 });
 
-router.get('/studentsearch/:studentId',(req,res)=>{
+router.get('/studentsearch/:studentId',checkAuth,(req,res)=>{
     // console.log("response")
     // studentRepo.getStudentSearch(req.params.studentId,(error,result)=>{
     //     if(error){
@@ -380,7 +339,7 @@ router.get('/studentsearch/:studentId',(req,res)=>{
     });
 })
 
-router.get('/events/:studentId',(req,res)=>{
+router.get('/events/:studentId',checkAuth,(req,res)=>{
     req.body.studentId = req.params.studentId
     req.body.path = "getEventsdetailsforstudent"
     kafka.make_request('student-events',req.body, (err,result) => {
@@ -408,7 +367,7 @@ router.get('/events/:studentId',(req,res)=>{
     // })
 })
 
-router.get('/eventregistrations/:studentId',(req,res)=>{
+router.get('/eventregistrations/:studentId',checkAuth,(req,res)=>{
     console.log("response")
     req.body.studentId = req.params.studentId
     req.body.path = "getRegistrationsStudent"
@@ -436,7 +395,7 @@ router.get('/eventregistrations/:studentId',(req,res)=>{
     // })
 })
 
-router.post('/uploadpic', upload.single('image'), async (req, response) => {
+router.post('/uploadpic',checkAuth, upload.single('image'), async (req, response) => {
     try {
       if (req.file) {
         const fileContent = fs.readFileSync(`./public/images/${req.body.studentId}${path.extname(req.file.originalname)}`);
@@ -491,7 +450,7 @@ router.post('/uploadpic', upload.single('image'), async (req, response) => {
     }
   });
 
-  router.post('/registerEvent', (req,res)=>{
+  router.post('/registerEvent',checkAuth, (req,res)=>{
     console.log(req.body)
     req.body.path = 'eventRegister'
     kafka.make_request('student-events',req.body, (err,result) => {

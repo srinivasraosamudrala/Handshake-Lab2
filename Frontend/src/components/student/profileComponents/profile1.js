@@ -66,6 +66,7 @@ class Profile1 extends Component {
                     last_name: this.state.profile1_last}
             }
             axios.defaults.withCredentials = true;
+            axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
             axios.post(environment.baseUrl+'/student/profile', data)
                 .then(response => {
                     if (response.data) {
@@ -113,7 +114,7 @@ class Profile1 extends Component {
                 'content-type': 'multipart/form-data'
             }
         };
-        
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         await axios.post(environment.baseUrl+"/student/uploadpic",formData, config)
             .then((response) => {
                 this.setState({

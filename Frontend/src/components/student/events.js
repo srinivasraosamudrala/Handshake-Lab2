@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import cookie from 'react-cookies';
 import axios from 'axios';
 import '../../App.css';
 import StudentNav from './studentNavbar';
-import { Card, CardContent, TablePagination} from '@material-ui/core/';
+import { Card, CardContent, TablePagination, Avatar} from '@material-ui/core/';
 import emptyPic from '../../images/empty-profile-picture.png';
 import {environment} from '../../Utils/constants'
+import CategoryIcon from '@material-ui/icons/Category';
 
 //create the Student Home Component
 class Events extends Component {
@@ -74,10 +74,12 @@ class Events extends Component {
                 showalert:true})
         }else{
         console.log(data)
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.post(environment.baseUrl+'/student/registerEvent' ,data)
         .then((response) => {
             console.log(response.data)
             appiledJob = this.state.appiledJob
+            this.getEventData()
             this.setState({
                 appliedjob: appiledJob.push(eventId)
             })
@@ -85,31 +87,22 @@ class Events extends Component {
         })}
     }
 
-    arrayBufferToBase64(buffer) {
-        var binary = '';
-        var bytes = [].slice.call(new Uint8Array(buffer));
-        bytes.forEach((b) => binary += String.fromCharCode(b));
-        return window.btoa(binary);
-    };
-
     componentDidMount() {
+        this.getEventData()
+    }
+
+    getEventData(){
         this.setState({ studentId: localStorage.getItem('studentId') })
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.get(environment.baseUrl+'/student/events/' + localStorage.getItem('studentId'))
             .then((response) => {
                 console.log(response.data)
                 if (response.data) {
-                    // var base64Flag = 'data:image/jpeg;base64,';
-                    // response.data.result.map((event,index) => {
-                    //     console.log("profile")
-                    //     if (event.profilepic!== null) {
-                    //         var imgstring = this.arrayBufferToBase64(event.profilepic.data);
-                    //          event.profilepic = base64Flag + imgstring
-                    //     }
-                    // } )
-                this.setState({
-                    eventlist: response.data
-                });
+                    this.setState({
+                        eventlist: response.data
+                    });
             }
+            axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
             axios.post(environment.baseUrl+'/student/education',{'studentId':localStorage.getItem('studentId')})
                 .then((response)=>{
                     console.log(response)
@@ -127,6 +120,8 @@ class Events extends Component {
         let erroralert = null;
         let namesearch = this.state.namesearch;
         let eventlist = this.state.eventlist;
+        let registerbutton = null;
+        let registrations = null;
         console.log(this.state.studentedu)
 
         if (this.state.eventlist) {
@@ -142,48 +137,63 @@ class Events extends Component {
             if (eventlist.length > 0) {
                 events = (
                     <div>
+                        <div style={{height:'450px', overflow:'auto'}}>
                         {eventlist.slice(this.state.page * this.state.rowsPerPage, this.state.page * this.state.rowsPerPage + this.state.rowsPerPage).map((event,index) => {
-                        // {eventlist.map((event, index) => { 
                             return (<div >
                                 <Link onClick={() => this.showEvent(index)} style={{ color: 'rgba(0, 0, 0, 0.8)' }}>
+                                <div class="col-md-2" style={{marginTop:'10px'}}><Avatar src={event.Company[0].image?event.Company[0].image:this.state.emptyprofilepic} style={{height:'50px', width:'50px',borderRadius:'0px',position:'relative',left:'-20px'}} >DP</Avatar></div>
+                                    <div class="col-md-10" style={{marginBottom:'16px'}}>
                                     <p style={{ fontSize: '16px', fontWeight: '700' }}>{event.event_name}</p>
                                     <p style={{ fontSize: '16px', fontWeight: '400' }}>{event.Company[0].name} - {event.location}</p>
-                                    <p style={{ fontSize: '14px', fontWeight: '400' }}>{event.eligibility}</p>
-                                    <hr style = {{width:'200%', position:"relative", left:"-50px"}}></hr></Link>
+                                    <p style={{ fontSize: '14px', fontWeight: '400' }}>{event.eligibility}</p></div>
+                                    <hr style = {{width:'100%'}}></hr></Link>
                             </div>
                             )
                         })}
+                        </div>
                         <TablePagination
                                 rowsPerPageOptions={[1,2,5, 10, 25, { label: 'All', value: -1 }]}
                                 colSpan={3}
                                 count={eventlist.length}
                                 rowsPerPage={this.state.rowsPerPage}
                                 page={this.state.page}
-                                // SelectProps={{
-                                //     inputProps: { 'aria-label': 'rows per page' },
-                                //     native: true,
-                                // }}
                                 onChangePage={this.handleChangePage}
                                 onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                                // style={{fontSize:'2px'}}
                                 />
                     </div>
                 )
                 eventdetailed = eventlist[this.state.eventindex]
+                console.log(eventdetailed.registrations.length)
+                if(eventdetailed.registrations.length){
+                    registrations = eventdetailed.registrations.find(app=>app.student_id===this.state.studentId)}
+                    console.log(registrations)
+                    if(registrations){
+                        registerbutton = <div style={{fontSize: '16px', fontWeight: '500', color: 'rgba(0,0,0,.8)',position:'relative', top:'-12px',border:'0px'}}>Registered</div>
+                    }else{
+                        registerbutton = <div><button class="btn btn-primary" style={{ backgroundColor: '#0d7f02', position:'relative', top:'-15px',border:'0px'}} onClick={()=>this.registerEvent(eventdetailed._id,eventdetailed.company_id,eventdetailed.eligibility)}>Register</button></div>
+                    }
                 detailedevent = (
                     <div>
                         {erroralert}
-                        <div style={{float:'left'}}><img src={eventdetailed.profilepic?eventdetailed.profilepic:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',left:'-10px'}} alt='Profile'/></div>
+                        <div style={{float:'left'}}><img src={eventdetailed.Company[0].image?eventdetailed.Company[0].image:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',left:'-10px'}} alt='Profile'/></div>
                         <div><p style={{ fontSize: '24px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{eventdetailed.event_name}</p>
                         <p style={{ fontSize: '18px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{eventdetailed.Company[0].name}</p>
-                        <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>{eventdetailed.eligibility}</p>
-                        <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>{eventdetailed.location}</p>
-                        <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)' }}>Posted </p></div>
-                        <div style={{ border: 'Solid 1px', borderRadius: '5px', padding: '30px', marginBottom: '24px' }}>
+                        <div class="row" style={{position:'relative', left:'85px'}}>
+                                <div class="col-md-3" style={{ padding: "0px" }}>
+                                    <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-map-marker" style={{ color: "#1569E0" }}></span> {eventdetailed.location}</div>
+                                </div> <div class="col-md-3" style={{ padding: "0px" }}>
+                                    <div style={{ fontSize: "13px" }}><span style={{ color: "#1569E0" }}><CategoryIcon/></span> {eventdetailed.eligibility}</div>
+                                </div> <div class="col-md-3" style={{ padding: "0px" }}>
+                                    {/* <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-usd" style={{ color: "#1569E0" }}></span> {jobdetailed.salary + " per hour"}</div> */}
+                        </div></div>
+                        </div>
+                        <div style={{ border: 'Solid 1px', borderRadius: '5px', padding: '30px', marginBottom: '24px',marginTop:'16px' }}>
                             <div class = 'col-md-9'> 
                             <p style={{ fontSize: '16px', fontWeight: '500', color: 'rgba(0,0,0,.8)', position:'relative', top:'-12px',left:'-15px'}}>Event is on {eventdetailed.date} at {eventdetailed.time}</p></div>
                             <div class = 'col-md-3'>
-                            <button class="btn btn-primary" style={{ backgroundColor: '#0d7f02', position:'relative', top:'-15px',border:'0px'}} onClick={()=>this.registerEvent(eventdetailed._id,eventdetailed.company_id,eventdetailed.eligibility)}>Register</button></div>
+                                {registerbutton}
+                            {/* <button class="btn btn-primary" style={{ backgroundColor: '#0d7f02', position:'relative', top:'-15px',border:'0px'}} onClick={()=>this.registerEvent(eventdetailed._id,eventdetailed.company_id,eventdetailed.eligibility)}>Register</button> */}
+                            </div>
                         </div>
                         <h2 style={{ fontSize: '27px', fontWeight: 'bold', textDecoration: 'underline', color: 'rgba(0, 0, 0, 0.8)' }}>{eventdetailed.event_name}</h2>
                         <p style={{ lineHeight: '20px', fontSize: '16px' }}>{eventdetailed.event_description}</p>

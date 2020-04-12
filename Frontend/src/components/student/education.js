@@ -87,6 +87,7 @@ class Education extends Component {
             id: stud_id,
             type: "education"
         }
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.post(environment.baseUrl+'/student/student_profile', edit_data)
             .then(response => {
                 console.log("in frontend after response");
@@ -101,6 +102,7 @@ class Education extends Component {
             }
             )
             .then(response => {
+                axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
                 axios.post(environment.baseUrl+'/student/get_student_education', data)
                     .then(response => {
                         console.log("in frontend after response");
@@ -126,6 +128,7 @@ class Education extends Component {
             type: "education"
         }
         console.log(data)
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.post(environment.baseUrl+'/student/get_student_education', data)
             .then(response => {
                 console.log("in frontend after response");

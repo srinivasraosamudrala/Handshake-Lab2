@@ -55,38 +55,23 @@ class StudentSearch extends Component {
         })
     }
 
-    viewstudent=()=>{
+    viewstudent=(studentId)=>{
+        localStorage.setItem('sstudentId',studentId);
         this.setState({
             showStudent:true
         })
     }
-    
-    arrayBufferToBase64(buffer) {
-        var binary = '';
-        var bytes = [].slice.call(new Uint8Array(buffer));
-        bytes.forEach((b) => binary += String.fromCharCode(b));
-        return window.btoa(binary);
-    };
 
     componentDidMount() {
         this.setState({ studentId: localStorage.getItem('studentId') })
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.get(environment.baseUrl+'/student/studentsearch/' + localStorage.getItem('studentId'))
             .then((response) => {
                 console.log(response.data)
                 if (response.data){
-                // var base64Flag = 'data:image/jpeg;base64,';
-                // response.data.result.map((student,index) => {
-                    // console.log("profile")
-                    // if (student.profilepic!== null) {
-                    //     var imgstring = this.arrayBufferToBase64(student.profilepic.data);
-                    //      student.profilepic = base64Flag + imgstring
-                    //      console.log(student.profilepic)
-                    // }
-                    // console.log(student.profilepic)
-                // } )
-                this.setState({
-                    studentsList:response.data
-                })}
+                    this.setState({
+                        studentsList:response.data
+                    })}
                 console.log(this.state.studentsList)
             })
     }
@@ -124,7 +109,7 @@ class StudentSearch extends Component {
                     <CardContent>
                         <div class="col-md-2" style={{marginTop:'20px'}}><Avatar src={student.image} style={{height:'104px', width:'104px'}} >{student.first_name[0]+student.last_name[0]}</Avatar></div>
                         <div class="col-md-9" style={{marginBottom:'16px',height:'150px'}}>
-                        <div style={{fontSize: '16px', fontWeight: '700' }}><Link onClick = {()=>{localStorage.setItem('sstudentId',student.studentId);this.viewstudent()}}>{student.first_name+" "+student.last_name}</Link></div>
+                        <div style={{fontSize: '16px', fontWeight: '700' }}><Link onClick = {()=>{this.viewstudent(student._id)}}>{student.first_name+" "+student.last_name}</Link></div>
                         {(student.college)?(<div style={{fontSize: '16px', fontWeight: '500' }}>{student.college}</div>):<div></div>}
                         {(student.education.length)?(<div style={{fontSize: '16px', fontWeight: '500' }}>{student.education[0].degree}</div>):<div></div>}
                         {(student.education.length)?(<div style={{fontSize: '16px', fontWeight: '500' }}>{student.education[0].major}</div>):<div></div>}

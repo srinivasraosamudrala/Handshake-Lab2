@@ -3,6 +3,7 @@ const Company = require('../Models/companyModel')
 const Jobs = require('../Models/jobModel')
 const Events = require('../Models/eventModel')
 const query = require('../Queries/mongooseQueries')
+var ObjectId = require('mongodb').ObjectID;
 
 exports.handle_request = (data, callback) => {
     console.log(data)
@@ -90,6 +91,36 @@ exports.handle_request = (data, callback) => {
         })
     }else if (data.path === 'listApplicants'){
         listApplicants(data.company_id,(error,result)=>{
+            if(error){
+                console.log(error)
+                callback({'error':error})
+            }else{
+                console.log("result")
+                callback(result)
+            }
+        })
+    }else if (data.path === 'companyupdateProfile'){
+        updateCompanyProfile(data,(error,result)=>{
+            if(error){
+                console.log(error)
+                callback({'error':error})
+            }else{
+                console.log("result")
+                callback(result)
+            }
+        })
+    }else if (data.path === 'companyupdateProfilepic'){
+        updateCompanyProfilePic(data,(error,result)=>{
+            if(error){
+                console.log(error)
+                callback({'error':error})
+            }else{
+                console.log("result")
+                callback(result)
+            }
+        })
+    }else if (data.path === 'updateStudentstatus'){
+        updateStudentstatus(data,(error,result)=>{
             if(error){
                 console.log(error)
                 callback({'error':error})
@@ -202,11 +233,20 @@ listRegistrations = (data,callback)=>{
 updateStudentstatus = (data,callback)=>{
     console.log(data)
     try{
-        connection.query(companyDBQueries.updateStudentstatus,
-                        [data.status,data.companyId,data.jobId,data.studentId],
-                        (err,rows) => {
-            callback(err,rows)
+        let match = null
+            match = {_id:ObjectId(data.jobId),
+                    'applications._id':ObjectId(data.applicationId)}
+
+        query.updateField(Jobs.createModel(),match,data.update,(err,result)=>{
+            console.log("post insert")
+            console.log(result)
+            callback(err,result)
         });
+        // connection.query(companyDBQueries.updateStudentstatus,
+        //                 [data.status,data.companyId,data.jobId,data.studentId],
+        //                 (err,rows) => {
+        //     callback(err,rows)
+        // });
     }
     catch(err)
     {
@@ -237,7 +277,7 @@ updateCompanyProfile = (companyDetails,callback) => {
             company_description: companyDetails.company_description
         }
         console.log(update)
-        query.updateField(Company.createModel(),companyDetails.company_id,update,(err,result)=>{
+        query.updateField(Company.createModel(),{_id:ObjectId(companyDetails.company_id)},update,(err,result)=>{
             callback(err,result)
         });
     }
@@ -248,9 +288,25 @@ updateCompanyProfile = (companyDetails,callback) => {
 }
 
 updateCompanyProfilePic = (companyDetails,callback) => {
+    // try{
+    //     image = new companyModel()
+    //     query.updateField(Company.createModel(),companyDetails.company_id,{image:companyDetails.image},(err,result)=>{
+    //         callback(err,result)
+    //     });
+    // }
+    // catch(err)
+    // {
+    //     callback(err,null)
+    // }
+
     try{
-        image = new companyModel()
-        query.updateField(Company.createModel(),companyDetails.company_id,{image:companyDetails.image},(err,result)=>{
+        // let update = {
+        //     image: companyDetails.update.image
+        // }
+        console.log(companyDetails)
+        console.log(companyDetails.update)
+
+        query.updateField(Company.createModel(),{_id:ObjectId(companyDetails.company_id)},companyDetails.update,(err,result)=>{
             callback(err,result)
         });
     }

@@ -42,6 +42,7 @@ class Registrations extends Component {
 
     componentDidMount() {
         this.setState({ studentId: localStorage.getItem('studentId') })
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.get(environment.baseUrl+'/student/eventregistrations/' + localStorage.getItem('studentId'))
             .then((response) => {
                 console.log(response.data)
@@ -77,11 +78,11 @@ class Registrations extends Component {
                 return (<Card style={{marginBottom:'20px', width:'80%', marginLeft:'150px'}}>
                     <CardContent>
                         <div class="col-md-1" style={{marginTop:'20px'}}>
-                            <img src={app.profilepic?app.profilepic:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',top:'-12px',left:'-10px'}} alt='Profile'/></div>
+                            <img src={app.Company[0].image?app.Company[0].image:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',top:'-12px',left:'-10px'}} alt='Profile'/></div>
                         <div class="col-md-9" style={{marginBottom:'16px'}}>
                         <div style={{fontSize: '16px', fontWeight: '700' }}>{app.event_name}</div>
                         <div style={{fontSize: '16px', fontWeight: '500' }}>{app.Company[0].name}</div>
-                        <div style={{fontSize: '16px', fontWeight: '500'}}>{"Location:" + app.location}</div>
+                        <div style={{fontSize: '16px', fontWeight: '500'}}><span class="glyphicon glyphicon-map-marker" style={{ color: "#1569E0" }}></span>{app.location}</div>
                         <div>Event is on {app.date} at {app.time}</div></div>
                     </CardContent>
                 </Card>)

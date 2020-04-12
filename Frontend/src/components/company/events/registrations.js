@@ -70,6 +70,7 @@ class ViewApplicants extends Component {
             event_id:this.state.event_id
         }
         console.log(data)
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.post(environment.baseUrl+'/company/listRegistrations', data)
             .then(response => {
                 console.log("in frontend after response");

@@ -35,6 +35,7 @@ class Events extends Component {
             'companyId': localStorage.getItem('companyId')
         }
         console.log(data)
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.get(environment.baseUrl+'/company/list-of-jobs-and-events/' + localStorage.getItem('companyId')+'/events')
             .then((response) => {
                 //update the state with the response data

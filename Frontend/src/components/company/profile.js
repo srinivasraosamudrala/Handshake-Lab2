@@ -40,16 +40,9 @@ class Profile extends Component {
 
     fetchCompanydetails(){
         console.log(localStorage.getItem('companyId'))
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.get(environment.baseUrl+'/company/profile/' + localStorage.getItem('companyId'))
             .then((response) => {
-                    console.log(response.data)
-                    var base64Flag = 'data:image/jpeg;base64,';
-                    
-                    if (response.data.result[0].image) {
-                        var imgstring = this.arrayBufferToBase64(response.data.result[0].image.data);
-                         response.data.result[0].image = base64Flag + imgstring
-                    }
-
                 this.setState({
                     profile : response.data.result[0],
                     companyname:response.data.result[0].name,
@@ -94,6 +87,11 @@ class Profile extends Component {
                 'content-type': 'multipart/form-data'
             }
         };
+
+        await console.log(formData)
+
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
         let rest = await axios.post(environment.baseUrl+"/company/uploadpic",formData, config)
             .then((response) => {
                 this.fetchCompanydetails();
@@ -102,6 +100,7 @@ class Profile extends Component {
                     file:null
                 })
             }).catch((error) => {
+                console.log('error occured while setting profilepic')
             });
     }
 
@@ -116,6 +115,7 @@ class Profile extends Component {
             'company_description':this.state.companydesc
         }
         console.log(data)
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.put(environment.baseUrl+'/company/updateprofile', data)
             .then((response)=>{
                 console.log(response.data)
@@ -134,17 +134,15 @@ class Profile extends Component {
         if (this.state.profile){
             console.log(this.state.editprofile)
         if(this.state.editprofile === true){
-            // redirectVar = <Redirect to= "/company/events"/>}
             companyEdit = (
                 <div>
                 <Card style={{borderTopRightRadius:'0px',borderTopLeftRadius:'0px'}}>
-                            <CardContent><div style ={{paddingTop:'30px', position: 'relative', top: '30px'}}>
-                                {/* <img src = {Company_Logo} alt = 'Logo' height='70' width='70' ></img> */}
+                            <CardContent><div style ={{ position: 'relative', top: '30px'}}>
                                 <div class="upload-btn-img">
-                                    <img src={this.state.image} height='70' width='70' class="img-thumbnail1 p-0 m-0" alt="Company"/>
+                                    <img src={this.state.image} height='70' width='70' alt="Company"/>
                                     <input type="file" name="image" onChange={this.showProfilepic} />
                                 </div>
-                                <div style = {{position:'relative', top:'-95px',left:'85px',marginTop:'20px'}}>
+                                <div style = {{position:'relative', top:'-110px',left:'85px'}}>
                                     <div className="col-md-8">
                                         <div class="form-group">
                                         <div class="active-pink-4 mb-4" style={{ width: "50%",float:"left"}}>
@@ -199,7 +197,7 @@ class Profile extends Component {
         companyEdit = (
             <div>
             <Card style={{borderTopRightRadius:'0px',borderTopLeftRadius:'0px'}}>
-                        <CardContent><div style ={{paddingTop:'30px', position: 'relative', top: '30px' }}>
+                        <CardContent><div style ={{ position: 'relative', top: '30px' }}>
                             {/* <img src = {Company_Logo} alt = 'Logo' height='70' width='70' ></img> */}
                             <img src = {this.state.image} alt = 'Logo' height='70' width='70' ></img>
                             <div style = {{position:'relative', top:'-70px',left:'85px'}}>

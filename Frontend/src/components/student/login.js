@@ -9,6 +9,7 @@ import {store} from '../../index'
 import {connect} from "react-redux";
 import {environment} from '../../Utils/constants'
 import { loginUser } from "../../redux/actions/index"
+const jwt_decode = require('jwt-decode');
 
 //Define a Login Component
 class Login extends Component{
@@ -21,7 +22,8 @@ class Login extends Component{
             username : "",
             password : "",
             authFlag : false,
-            authError : false
+            authError : false,
+            token : ""
         }
         //Bind the handlers to this class
         this.usernameChangeHandler = this.usernameChangeHandler.bind(this);
@@ -65,14 +67,22 @@ class Login extends Component{
                 if(response.data){
                     this.setState({
                         authFlag : true,
-                        authError : false
+                        authError : false,
+                        token : response.data.result
                     })
-                    localStorage.setItem('studentId', response.data._id);
-                    localStorage.setItem('studentfirstname', response.data.first_name);
-                    localStorage.setItem('studentlastname', response.data.last_name);
-                    localStorage.setItem('studentemail', response.data.email);
-                    localStorage.setItem('studentcollege', response.data.college);
-                    this.props.loginUser(response.data[0])
+                    if (this.state.token.length > 0) {
+                        localStorage.setItem("token", this.state.token);
+                        var decoded = jwt_decode(this.state.token.split(' ')[1]);
+                        localStorage.setItem("studentId", decoded._id);
+                        localStorage.setItem("studentemail", decoded.username);
+
+                        // localStorage.setItem('studentId', response.data._id);
+                        // localStorage.setItem('studentfirstname', response.data.first_name);
+                        // localStorage.setItem('studentlastname', response.data.last_name);
+                        // localStorage.setItem('studentemail', response.data.email);
+                        // localStorage.setItem('studentcollege', response.data.college);
+                        this.props.loginUser(response.data[0])
+                    }
                 }else{
                     console.log(response.data.error)
                     this.setState({

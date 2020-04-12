@@ -5,6 +5,7 @@ import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
 import { Link } from 'react-router-dom';
 import {environment} from '../../Utils/constants'
+const jwt_decode = require('jwt-decode');
 
 //Define a Login Component
 class Login extends Component {
@@ -18,7 +19,8 @@ class Login extends Component {
             email: "",
             password: "",
             authFlag: false,
-            authError: false
+            authError: false,
+            token:""
         }
         //Bind the handlers to this class
         this.inputChangeHandler = this.inputChangeHandler.bind(this);
@@ -51,7 +53,6 @@ class Login extends Component {
         console.log(data)
         //set the with credentials to true
         axios.defaults.withCredentials = true;
-
         //make a post request with the user data
         axios.post(environment.baseUrl+'/company/signup', data)
             .then(response => {
@@ -61,9 +62,10 @@ class Login extends Component {
                     this.setState({
                         authFlag: true,
                         authError: false,
-                        companyid: response.data._id
+                        // companyid: response.data._id,
+                        token : response.data.result
                     })
-                } else {
+            }else {
                     console.log(response.data.error)
                     this.setState({
                         authFlag: false,
@@ -77,6 +79,12 @@ class Login extends Component {
         //redirect based on successful login
         let redirectVar = null;
         let invalid = null;
+        if (this.state.token.length > 0) {
+            localStorage.setItem("token", this.state.token);
+            var decoded = jwt_decode(this.state.token.split(' ')[1]);
+            localStorage.setItem("companyId", decoded._id);
+            console.log(localStorage.getItem("companyId"));
+    } 
         // if (cookie.load('companycookie')) {
         if (localStorage.getItem('companyId')){
             console.log("route to home")

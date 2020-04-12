@@ -21,6 +21,7 @@ class Profile extends Component {
     componentDidMount(){
         // this.setState({ studentId: localStorage.getItem('studentId') })
         console.log(localStorage.getItem('companyId'))
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.get(environment.baseUrl+'/company/profile/' + localStorage.getItem('companyId'))
             .then((response) => {
                 this.setState({

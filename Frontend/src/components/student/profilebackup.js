@@ -94,6 +94,7 @@ class Profile extends Component {
 
     readstudentdata(){
         this.setState({ studentId: localStorage.getItem('studentId') })
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.get(environment.baseUrl+'/student/profile/' + localStorage.getItem('studentId'))
             .then((response) => {
                 //update the state with the response data
@@ -201,7 +202,7 @@ class Profile extends Component {
         console.log(data)
         //set the with credentials to true
         axios.defaults.withCredentials = true;
-
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         //make a post request with the user data
         axios.post(environment.baseUrl+'/student/profile', data)
             .then(response => {
@@ -240,7 +241,7 @@ class Profile extends Component {
                 console.log(data)
                 //set the with credentials to true
                 axios.defaults.withCredentials = true;
-        
+                axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
                 //make a post request with the user data
                 axios.post(environment.baseUrl+'/student/profile', data)
                     .then(response => {

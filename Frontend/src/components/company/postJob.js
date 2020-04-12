@@ -60,6 +60,7 @@ class addJob extends Component{
         axios.defaults.withCredentials = true;
         //make a post request with the user data
         console.log(data)
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.post(environment.baseUrl+'/company/postjob',data)
             .then(response => {
                 if(response.data.result){

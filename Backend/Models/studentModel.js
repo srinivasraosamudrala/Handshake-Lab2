@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const uniqueValidator = require('mongoose-unique-validator')
 
 const studentSchema = new Schema({
     _id: {
@@ -10,7 +11,7 @@ const studentSchema = new Schema({
     id: { type: String, required: false },
     first_name: { type: String, required: true },
     last_name: {type:String, required:true},
-    email: { type: String, required: true },
+    email: { type: String, required: true, unique:true },
     password: { type: String, required: true },
     college: { type: String, required: true },
     dob: { type: String, required: false },
@@ -51,6 +52,8 @@ const studentSchema = new Schema({
         }
     ]
 }, { _id: false }, { collection: 'students' });
+
+studentSchema.plugin(uniqueValidator)
 
 const createModel = function () {
     return mongoose.model("students", studentSchema)

@@ -37,14 +37,15 @@ class ViewApplicants extends Component {
     }
     //submit Login handler to send a request to the node backend
 
-    updateStatus = (companyId,jobId,studentId) => {
+    updateStatus = (jobId,applicationId,studentId) => {
         let data ={
-            'companyId':companyId,
             'jobId':jobId,
-            'studentId':studentId,
-            'status':this.state.showStatus
+            'applicationId':applicationId,
+            update:{
+            'applications.$.status':this.state.showStatus}
         }
         console.log(data)
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.put(environment.baseUrl+'/company/updateStudentstatus', data)
             .then(response => {
                 console.log(response)
@@ -99,6 +100,7 @@ class ViewApplicants extends Component {
             job_id:this.state.job_id
         }
         console.log(data)
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.post(environment.baseUrl+'/company/listApplicants', data)
             .then(response => {
                 console.log("in frontend after response");
@@ -156,7 +158,6 @@ class ViewApplicants extends Component {
         console.log(stuData)
         return (
             <div>
-                {console.log("applicants")}
                 <div class="container">
                             <div class="panel1">
                                 <h2 style={{position:'relative',top:'10px'}}>Students Applied </h2>
@@ -168,7 +169,7 @@ class ViewApplicants extends Component {
                                 {renderRedirect}
                             </div>
                                 <div>
-                                    {stuData.map((data, index) => {
+                                    {stuData.length?stuData[0].applications.map((data, index) => {
                                         return (
                                             <div style={{margin:"10px 0px 10px 100px",width:"80%"}}>
                                             <Card>
@@ -176,12 +177,12 @@ class ViewApplicants extends Component {
                                                 <div key={data.stud_id} style={{padding:'10px 0px 10px 50px'}}>
                                                 <div className="row App-align">
                                                 <div className="col-md-1">
-                                                    <img src={data.studentDetails[0].image?data.studentDetails[0].image:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',top:'20px',left:'-30px'}} alt='Profile'/>
+                                                    <img src={stuData[0].studentDetails[index].image?stuData[0].studentDetails[index].image:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',top:'20px',left:'-30px'}} alt='Profile'/>
                                                 </div>
-                                                <div className="col-md-8" style={{ fontSize: "23px", color: "#1569E0",marginLeft:"-10px" }}><Link onClick = {()=>(this.viewProfile(data.stud_id))}>{data.firstName+ " " +data.lastName}</Link>
-                                                <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-envelope" style={{ color: "#1569E0" }}></span> {data.email}</div>    
-                                                <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-book" style={{ color: "#1569E0" }}></span> {data.collegename}</div>
-                                                <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-calendar" style={{ color: "#1569E0" }}></span> Applied on {data.applieddate}</div>
+                                                <div className="col-md-8" style={{ fontSize: "23px", color: "#1569E0",marginLeft:"-10px" }}><Link onClick = {()=>(this.viewProfile(data.stud_id))}>{stuData[0].studentDetails[index].first_name+ " " +stuData[0].studentDetails[index].last_name}</Link>
+                                                <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-envelope" style={{ color: "#1569E0" }}></span> {stuData[0].studentDetails[index].email}</div>    
+                                                <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-book" style={{ color: "#1569E0" }}></span> {stuData[0].studentDetails[index].college}</div>
+                                                <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-calendar" style={{ color: "#1569E0" }}></span> Applied on {data.applied_date}</div>
                                                 <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-time" style={{ color: "#1569E0" }}></span> Status:{data.status}</div></div>
                                                 <div className="col-md-3">
                                                 <div style={{marginLeft:'15px',marginBottom:'10px', border:'2px'}}>
@@ -191,7 +192,7 @@ class ViewApplicants extends Component {
                                                         <option value="Reviewed" >Reviewed</option>
                                                         <option value="Declined" >Declined</option>
                                                     </select></div>
-                                                    <button class="btn btn-primary" style={{backgroundColor:'#1569E0', marginLeft:'15px', borderRadius:'15px'}} onClick={()=>(this.updateStatus(data.companyId,data.jobId,data.studentId))}>Update Status</button>
+                                                    <button class="btn btn-primary" style={{backgroundColor:'#1569E0', marginLeft:'15px', borderRadius:'15px'}} onClick={()=>(this.updateStatus(stuData[0]._id,data._id,stuData[0].studentDetails[index]._id))}>Update Status</button>
                                                     <button class="btn btn-primary" style={{backgroundColor:'#808080', marginTop:'20px', marginLeft:'15px', borderRadius:'15px', width :'113px',border:'0px'}} onClick={()=>this.previewResume()}><span class="glyphicon glyphicon-paperclip" style={{ color: "white" }}></span>   Resume</button></div>
                                                     <Dialog
                                                         aria-labelledby="simple-modal-title"
@@ -224,7 +225,7 @@ class ViewApplicants extends Component {
                                             </div>
                                             
                                         )
-                                    })}
+                                    }):<div></div>}
                                 </div>                          
                         </div>
                     </div>

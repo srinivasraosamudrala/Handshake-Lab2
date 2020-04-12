@@ -53,6 +53,7 @@ class JobApplications extends Component {
 
     componentDidMount() {
         this.setState({ studentId: localStorage.getItem('studentId') })
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.get(environment.baseUrl+'/student/jobapplications/' + localStorage.getItem('studentId'))
             .then((response) => {
                 if (response.data.length>0) {
@@ -89,7 +90,7 @@ class JobApplications extends Component {
                 return (<Card style={{marginBottom:'20px'}}>
                     <CardContent>
                         <div class="col-md-1">
-                        <img src={app.profilepic?app.profilepic:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',top:'8px',left:'-15px'}} alt='Profile'/>
+                        <img src={app.Company[0].image?app.Company[0].image:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',top:'8px',left:'-15px'}} alt='Profile'/>
                         </div>
                         <div class="col-md-9" style={{marginBottom:'16px'}}>
                         <div style={{fontSize: '16px', fontWeight: '700' }}>{app.title}</div>

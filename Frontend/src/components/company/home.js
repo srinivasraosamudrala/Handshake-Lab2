@@ -48,6 +48,7 @@ class Home extends Component {
 
     //get the job data from backend  
     componentDidMount() {
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.get(environment.baseUrl+'/company/list-of-jobs-and-events/' + localStorage.getItem('companyId')+'/jobs')
             .then((response) => {
                 //update the state with the response data

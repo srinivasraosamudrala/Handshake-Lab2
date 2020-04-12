@@ -77,6 +77,7 @@ class Profile1 extends Component {
 
             console.log(data)
             axios.defaults.withCredentials = true;
+            axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
             axios.post(environment.baseUrl+'/student/profile', data)
                 .then(response => {
                     console.log(response.data)

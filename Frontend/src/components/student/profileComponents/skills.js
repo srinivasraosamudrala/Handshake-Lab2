@@ -45,7 +45,7 @@ class Skillset extends Component {
                 };
             //set the with credentials to true
                 axios.defaults.withCredentials = true;
-    
+                axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
             //make a post request with the user data
                 axios.post(environment.baseUrl+'/student/profile', data)
                 .then(response => {
@@ -84,7 +84,7 @@ class Skillset extends Component {
         };
     //set the with credentials to true
         axios.defaults.withCredentials = true;
-
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
     //make a post request with the user data
         axios.post(environment.baseUrl+'/student/profile', data)
         .then(response => {

@@ -59,7 +59,7 @@ class StudentNav extends Component {
                     </div>
                 );
             }
-            else if(this.props.comp === "messages"){
+            else if(this.props.comp === "Messages"){
                 navUpdate = (
                     <div>
                         <ul class="nav navbar-nav">

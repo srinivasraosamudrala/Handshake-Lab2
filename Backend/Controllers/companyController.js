@@ -10,6 +10,9 @@ const fs = require('fs');
 const Company = require('../Models/companyModel');
 const query = require('../Database/mongooseQueries')
 const AWS = require('aws-sdk');
+const { checkAuth,auth } = require("../utils/passport");
+const jwt = require('jsonwebtoken');
+var { secret } = require("../utils/config");
 
 const s3 = new AWS.S3({
 	    accessKeyId:
@@ -66,6 +69,11 @@ router.post('/signup',(req,res) => {
     kafka.make_request('login-signup',req.body, (err,result) => {
     console.log('in result');
     console.log(result);
+
+    if (req.body.signup === false){
+        auth();
+    }
+
     if (err){
         console.log("Inside err");
         res.json({'error':err})
@@ -78,13 +86,22 @@ router.post('/signup',(req,res) => {
                 console.log("error")
                 res.json({"error":"invalid credentials"})
             }else{
-            res.json(result[0]);
+                const payload = { _id: result[0]._id, username: req.body.email};
+            console.log(result[0]._id)
+            console.log(req.body.email)
+            const token = jwt.sign(payload, secret, {
+                expiresIn: 1008000
+            });
+                console.log("token is")
+                console.log(token)
+                res.json({"result":"JWT " +token})
+                // res.json(result[0]);
             }
         }
 });
 })
 
-router.get('/list-of-jobs-and-events/:company_id/:type',(req,res)=>{
+router.get('/list-of-jobs-and-events/:company_id/:type',checkAuth,(req,res)=>{
     if(req.params.type == 'jobs'){
         // companyRepo.getJoblist(req.params.company_id,(error,result) =>{
         //     if(error)
@@ -119,7 +136,7 @@ router.get('/list-of-jobs-and-events/:company_id/:type',(req,res)=>{
         })
     }
 })
-router.post('/postjob',(req,res)=>{
+router.post('/postjob',checkAuth,(req,res)=>{
     req.body.path = 'postjob'
     kafka.make_request('company-jobs',req.body, (err,result) =>{
         if(err)
@@ -135,7 +152,7 @@ router.post('/postjob',(req,res)=>{
     //         res.send({'result':result})
     // })
 })
-router.post('/postevent',(req,res)=>{
+router.post('/postevent',checkAuth,(req,res)=>{
     req.body.path = 'postevent'
     kafka.make_request('company-events',req.body, (err,result) =>{
         if(err)
@@ -152,7 +169,7 @@ router.post('/postevent',(req,res)=>{
     // })
 })
 
-router.post('/listApplicants',(req,res)=>{
+router.post('/listApplicants',checkAuth,(req,res)=>{
     req.body.path = 'listApplicants'
     kafka.make_request('company-jobs',req.body, (err,result) =>{
         if(err)
@@ -172,7 +189,7 @@ router.post('/listApplicants',(req,res)=>{
     // }) 
 })
 
-router.post('/listRegistrations',(req,res)=>{
+router.post('/listRegistrations',checkAuth,(req,res)=>{
     req.body.path = 'listRegistrations'
     kafka.make_request('company-events',req.body, (err,result) =>{
         if(err)
@@ -193,7 +210,7 @@ router.post('/listRegistrations',(req,res)=>{
 
 
 
-router.put('/updateStudentstatus', (req,res)=>{
+router.put('/updateStudentstatus', checkAuth,(req,res)=>{
     req.body.path = 'updateStudentstatus'
     kafka.make_request('company-jobs',req.body, (err,result) =>{
         if(err)
@@ -211,7 +228,7 @@ router.put('/updateStudentstatus', (req,res)=>{
     // })
 })
 
-router.get('/profile/:companyId',(req,res)=>{
+router.get('/profile/:companyId',checkAuth,(req,res)=>{
     let body = {'company_id':req.params.companyId,
                 'path':'companyProfile'}
         kafka.make_request('company-profile',body, (err,result) =>{
@@ -231,10 +248,10 @@ router.get('/profile/:companyId',(req,res)=>{
     // })
 })
 
-router.put('/updateprofile',(req,res)=>{
+router.put('/updateprofile',checkAuth,(req,res)=>{
     
     req.body.path = 'companyupdateProfile'
-    kafka.make_request('company-profile',body, (err,result) =>{
+    kafka.make_request('company-profile',req.body, (err,result) =>{
         if(err)
             res.send({'error':err})
         else{
@@ -250,7 +267,7 @@ router.put('/updateprofile',(req,res)=>{
     // })
 })
 
-router.post('/uploadpic', upload.single('profilepic'), async (request, response) => {
+router.post('/uploadpic',checkAuth, upload.single('profilepic'), async (request, response) => {
     try {
       if (request.file) {
         const fileContent = fs.readFileSync(`./public/images/${request.body.companyId}${path.extname(request.file.originalname)}`);
@@ -259,29 +276,46 @@ router.post('/uploadpic', upload.single('profilepic'), async (request, response)
         console.log(request.body.companyId);
         const params = {
             Bucket: 'handshakesrinivas',
-            Key: req.body.company_id + path.extname(req.file.originalname),
+            Key: request.body.companyId + path.extname(request.file.originalname),
             Body: fileContent,
-            ContentType: req.file.mimetype
+            ContentType: request.file.mimetype
         };
+
+        console.log(params)
 
         s3.upload(params, function (err, data) {
             if (err) {
+                console.log(err.message)
                 return response.status(500).json({ "error": err.message })
             }
-            console.log(data);
+            // console.log(data);
+            console.log('imageid')
+            console.log(data.Location)
             let companyDetails = {
                     company_id:request.body.companyId,
-                    image:data.Location
+                    update:{
+                    image:data.Location},
+                    path : 'companyupdateProfilepic'
                 }
-        companyRepo.updateCompanyProfilePic(companyDetails,(err,result)=>{
-            if(err){
-                console.log(err)
-                response.json({"error":err})
-            }   
+        
+        console.log(companyDetails)
+
+        kafka.make_request('company-profile',companyDetails, (err,result) =>{
+            if(err)
+            response.send({'error':err})
             else{
-                response.json({"result":result})
-            }
-        });
+                response.send({"result":result})}
+        })
+
+        // companyRepo.updateCompanyProfilePic(companyDetails,(err,result)=>{
+        //     if(err){
+        //         console.log(err)
+        //         response.json({"error":err})
+        //     }   
+        //     else{
+        //         response.json({"result":result})
+        //     }
+        // });
       })}
     } catch (ex) {
       const message = ex.message ? ex.message : 'Error while uploading image';

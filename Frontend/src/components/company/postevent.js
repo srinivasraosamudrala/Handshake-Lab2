@@ -66,6 +66,7 @@ class addEvent extends Component{
         //set the with credentials to true
         axios.defaults.withCredentials = true;
         //make a post request with the user data
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.post(environment.baseUrl+'/company/postevent',data)
             .then(response => {
                 console.log("Status Code : ",response.status);
