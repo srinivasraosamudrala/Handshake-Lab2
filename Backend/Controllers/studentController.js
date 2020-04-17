@@ -310,15 +310,6 @@ router.post('/applyjob',checkAuth, upload.single('file'), (req,res)=>{
 });
 
 router.get('/studentsearch/:studentId',checkAuth,(req,res)=>{
-    // console.log("response")
-    // studentRepo.getStudentSearch(req.params.studentId,(error,result)=>{
-    //     if(error){
-    //         res.json({'error':error})
-    //     }else{
-    //         console.log(result)
-    //         res.json({'result':result})
-    //     }   
-    // })
 
     req.body.studentId = req.params.studentId
     req.body.path = "studentsearch"

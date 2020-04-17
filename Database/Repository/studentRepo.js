@@ -79,6 +79,10 @@ exports.handle_request = (data, callback) => {
         getStudentSearch(data,(error,result)=>{
             callback(error,result)
         })
+    }else if(data.path == 'getStudentEducation'){
+        getStudentEducation(data,(error,result)=>{
+            callback(error,result)
+        })
     }
 }
 
@@ -134,9 +138,17 @@ getEventsdetailsforstudent = (studentId,callback) => {
     //         callback(err,result)
     //     })
     try{
+        let resultarr = []
         query.findDocumentsByLookup(Events.createModel(),'companies',{},'company_id','_id','Company',(err,result)=>{
             console.log(result)
-            callback(err,result)
+            // resultarr.push(result)
+            // query.findDocumentsByQuery(Student.createModel(),{_id:student.studentId},{education:1},{runValidators:false},(err,result)=>{
+            //     console.log(result)
+            //     resultarr.push(result)
+            //     console.log(resultarr)
+                // callback(err,resultarr)
+                // });
+                callback(err,result)
             });
     }
     catch(err)
@@ -372,47 +384,56 @@ getStudentDetails = (studentDetails,callback) => {
     // });
 }
 
-exports.getStudentBasic = (studentId,callback) => {
-    console.log(studentId)
-    connection.query(studentDBQueries.studentBasicSelect,
-        studentId,
-        (err, result) => {
-            callback(err,result)
-    });
+// exports.getStudentBasic = (studentId,callback) => {
+//     console.log(studentId)
+//     connection.query(studentDBQueries.studentBasicSelect,
+//         studentId,
+//         (err, result) => {
+//             callback(err,result)
+//     });
+// }
+
+getStudentEducation = (student,callback) => {
+    // console.log(student.studentId)
+    // connection.query(studentDBQueries.studentEducationSelect,
+    //     student.studentId,
+    //     (err, result) => {
+    //         callback(err,result)
+    // });
+    try{
+        query.findDocumentsByQuery(Student.createModel(),{_id:student.studentId},{education:1},{runValidators:false},(err,result)=>{
+        console.log(result)
+        callback(err,result)
+        });
+    }
+    catch(error){
+        return callback(error,null)
+    }
 }
 
-exports.getStudentEducation = (student,callback) => {
-    console.log(student.studentId)
-    connection.query(studentDBQueries.studentEducationSelect,
-        student.studentId,
-        (err, result) => {
-            callback(err,result)
-    });
-}
+// exports.getStudentExperience = (studentId,callback) => {
+//     connection.query(studentDBQueries.studentExperienceSelect,
+//         studentId,
+//         (err, result) => {
+//             callback(err,result)
+//     });
+// }
 
-exports.getStudentExperience = (studentId,callback) => {
-    connection.query(studentDBQueries.studentExperienceSelect,
-        studentId,
-        (err, result) => {
-            callback(err,result)
-    });
-}
+// exports.getStudentContact = (studentId,callback) => {
+//     connection.query(studentDBQueries.studentContactSelect,
+//         studentId,
+//         (err, result) => {
+//             callback(err,result)
+//     });
+// }
 
-exports.getStudentContact = (studentId,callback) => {
-    connection.query(studentDBQueries.studentContactSelect,
-        studentId,
-        (err, result) => {
-            callback(err,result)
-    });
-}
-
-exports.getStudentSkillset = (studentId,callback) => {
-    connection.query(studentDBQueries.studentSkillsetSelect,
-        studentId,
-        (err, result) => {
-            callback(err,result)
-    });
-}
+// exports.getStudentSkillset = (studentId,callback) => {
+//     connection.query(studentDBQueries.studentSkillsetSelect,
+//         studentId,
+//         (err, result) => {
+//             callback(err,result)
+//     });
+// }
 
 getApplicationStudent = (studentDetails,callback) => {
     try{

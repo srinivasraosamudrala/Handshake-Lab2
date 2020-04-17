@@ -5,6 +5,8 @@ import { Card, CardContent, TablePagination} from '@material-ui/core/';
 import axios from 'axios';
 import emptyPic from '../../images/empty-profile-picture.png';
 import {environment} from '../../Utils/constants'
+import { connect } from "react-redux";
+import { getStudentApplications } from "../../redux/actions/index";
 
 //create the Student Home Component
 class JobApplications extends Component {
@@ -44,27 +46,13 @@ class JobApplications extends Component {
         })
     }
 
-    arrayBufferToBase64(buffer) {
-        var binary = '';
-        var bytes = [].slice.call(new Uint8Array(buffer));
-        bytes.forEach((b) => binary += String.fromCharCode(b));
-        return window.btoa(binary);
-    };
-
     componentDidMount() {
         this.setState({ studentId: localStorage.getItem('studentId') })
+        this.props.getStudentApplications();
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         axios.get(environment.baseUrl+'/student/jobapplications/' + localStorage.getItem('studentId'))
             .then((response) => {
                 if (response.data.length>0) {
-                //     var base64Flag = 'data:image/jpeg;base64,';
-                //     response.data.result.map((student) => {
-                //         console.log("profile")
-                //         if (student.profilepic!== null) {
-                //             var imgstring = this.arrayBufferToBase64(student.profilepic.data);
-                //              student.profilepic = base64Flag + imgstring
-                //         }
-                //     } )
                 this.setState({
                     applications: response.data,
                 });
@@ -75,8 +63,8 @@ class JobApplications extends Component {
 
     render(){
         let jobapplications = null;
-        let applications = this.state.applications
-        if (applications){
+        let applications = this.props.applications
+        if (applications.length){
             if (this.state.status){
                 applications=applications.filter((app) => {
                     return this.state.status.indexOf(app.applications[0].status) > -1
@@ -144,4 +132,19 @@ class JobApplications extends Component {
 }
 }
 
-export default JobApplications;
+const mapStateToProps = state => {
+    console.log(state)
+    return {
+        applications: state.studentapplications,
+    };
+};
+
+function mapDispatchToProps(dispatch) {
+    return {
+        getStudentApplications : payload => dispatch(getStudentApplications(payload)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(JobApplications);
+
+// export default JobApplications;

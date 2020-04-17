@@ -90,7 +90,17 @@ exports.handle_request = (data, callback) => {
             }
         })
     }else if (data.path === 'listApplicants'){
-        listApplicants(data.company_id,(error,result)=>{
+        listApplicants(data,(error,result)=>{
+            if(error){
+                console.log(error)
+                callback({'error':error})
+            }else{
+                console.log("result")
+                callback(result)
+            }
+        })
+    }else if (data.path === 'listRegistrations'){
+        listRegistrations(data,(error,result)=>{
             if(error){
                 console.log(error)
                 callback({'error':error})
@@ -204,7 +214,7 @@ postEvent = (eventDetails,callback) => {
 
 listApplicants = (data,callback)=>{
     try{
-        query.findDocumentsByLookup(Jobs.createModel(),'students',{},'applications.student_id','_id','studentDetails',(err,result)=>{
+        query.findDocumentsByLookup(Jobs.createModel(),'students', {_id:ObjectId(data.job_id)},'applications.student_id','_id','studentDetails',(err,result)=>{
             console.log(result)
             callback(err,result)
             });
@@ -217,7 +227,7 @@ listApplicants = (data,callback)=>{
 
 listRegistrations = (data,callback)=>{
     try{
-        query.findDocumentsByLookup(Jobs.createModel(),'companies',{},'company_id','_id','Company',(err,result)=>{
+        query.findDocumentsByLookup(Events.createModel(),'students',{_id:ObjectId(data.event_id)},'registrations.student_id','_id','studentDetails',(err,result)=>{
             console.log(result)
             callback(err,result)
             });

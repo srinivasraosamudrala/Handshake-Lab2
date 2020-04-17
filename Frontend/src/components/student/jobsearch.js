@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import cookie from 'react-cookies';
 import axios from 'axios';
 import '../../App.css';
 import StudentNav from './studentNavbar';
@@ -8,9 +7,10 @@ import { Card, CardContent, Button, Dialog, DialogContent, TablePagination, Avat
 import CategoryIcon from '@material-ui/icons/Category';
 import emptyPic from '../../images/empty-profile-picture.png';
 import { environment } from '../../Utils/constants'
-// import {DropdownButton,Dropdown,Butto} from 'react-bootstrap'
 import DropdownButton from 'react-bootstrap/DropdownButton'
 import { Dropdown } from 'react-bootstrap'
+import { connect } from "react-redux";
+import { getStudentJobs, applyJobs } from "../../redux/actions/index";
 
 
 
@@ -70,19 +70,13 @@ class JobSearch extends Component {
         })
     }
 
-    showJob = (e) => {
+    showJob = (e,companyId) => {
+        localStorage.setItem('currcompanyId',companyId)
         this.setState({
             jobindex: e
         })
-
+        console.log('currentcompanyId')
     }
-
-    arrayBufferToBase64(buffer) {
-        var binary = '';
-        var bytes = [].slice.call(new Uint8Array(buffer));
-        bytes.forEach((b) => binary += String.fromCharCode(b));
-        return window.btoa(binary);
-    };
 
 
     jobFilter = (e) => {
@@ -108,7 +102,7 @@ class JobSearch extends Component {
         fdata.append('companyId', companyId)
         fdata.append('studentId', localStorage.getItem('studentId'));
         fdata.append('status', "Pending");
-        fdata.append('appliedDate', new Date().toISOString().slice(0, 9));
+        fdata.append('appliedDate', new Date().toISOString().slice(0, 10));
         fdata.append('file', this.state.resume);
 
         const config = {
@@ -125,18 +119,19 @@ class JobSearch extends Component {
             'resume': this.state.resume
         }
         await console.log(fdata)
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        const rest = await axios.post(environment.baseUrl + '/student/applyjob', fdata, config)
-            .then((response) => {
-                console.log(response.data)
-                appiledJob = this.state.appiledJob
-                this.uploadResume(0, 0)
-                this.getJoblist()
-                this.setState({
-                    appliedjob: appiledJob.push(jobId)
-                })
-
-            })
+        const rest = await this.props.applyJobs(fdata,config)
+        await this.uploadResume(0, 0)
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+        // const rest = await axios.post(environment.baseUrl + '/student/applyjob', fdata, config)
+        //     .then((response) => {
+        //         console.log(response.data)
+        //         appiledJob = this.state.appiledJob
+        //         this.uploadResume(0, 0)
+        //         this.getJoblist()
+        //         this.setState({
+        //             appliedjob: appiledJob.push(jobId)
+        //         })
+        //     })
     }
 
     uploadResume = (companyId, jobId) => {
@@ -157,19 +152,20 @@ class JobSearch extends Component {
 
     getJoblist() {
         this.setState({ studentId: localStorage.getItem('studentId') })
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        axios.get(environment.baseUrl + '/student/jobsearch/' + localStorage.getItem('studentId'))
-            .then((response) => {
-                if (response.data.length > 0) {
-                    this.setState({
-                        joblist: response.data
-                    })
-                }
-            })
+        this.props.getStudentJobs()
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+        // axios.get(environment.baseUrl + '/student/jobsearch/' + localStorage.getItem('studentId'))
+        //     .then((response) => {
+        //         if (response.data.length > 0) {
+        //             this.setState({
+        //                 joblist: response.data
+        //             })
+        //         }
+        //     })
     }
 
     sortbyloc() {
-        let joblist = this.state.joblist
+        let joblist = this.props.joblist
 
         let compare = (a,b) =>{
             let comparison = 0
@@ -191,7 +187,7 @@ class JobSearch extends Component {
     }
 
     sortbyPostingDate() {
-        let joblist = this.state.joblist
+        let joblist = this.props.joblist
 
         let compare = (a,b) =>{
             let comparison = 0
@@ -212,7 +208,7 @@ class JobSearch extends Component {
     }
 
     sortbyPostingDatedesc() {
-        let joblist = this.state.joblist
+        let joblist = this.props.joblist
 
         let compare = (a,b) =>{
             let comparison = 0
@@ -233,7 +229,7 @@ class JobSearch extends Component {
     }
 
     sortbyDeadline() {
-        let joblist = this.state.joblist
+        let joblist = this.props.joblist
 
         let compare = (a,b) =>{
             let comparison = 0
@@ -255,7 +251,7 @@ class JobSearch extends Component {
 
     sortbyDeadlinedesc() {
         console.log("sortbyDeadlinedesc")
-        let joblist = this.state.joblist
+        let joblist = this.props.joblist
 
         let compare = (a,b) =>{
             let comparison = 0
@@ -285,9 +281,9 @@ class JobSearch extends Component {
         let jobapplybutton = null;
         let sortfilter = null;
 
-        if (this.state.joblist) {
-            console.log(this.state.joblist)
-            let joblist = this.state.joblist
+        if (this.props.joblist) {
+            console.log(this.props.joblist)
+            let joblist = this.props.joblist
             jobfilter = this.state.jobfilter
 
             if (namesearch.length > 0) {
@@ -314,7 +310,7 @@ class JobSearch extends Component {
             if (joblist.length > 0) {
                 jobs = (
                     <div>
-                        <div style={{ height: '450px', overflow: 'auto' }}>
+                        <div style={{ height: '500px', overflow: 'auto' }}>
                             <div class='row' style={{width:'315px'}}>
                                 <div class='col-md-4' style={{ position:'relative',fontWeight:'700', top:'5px'}}>Jobs</div>
                                 <div class="col-md-4"></div>
@@ -330,12 +326,13 @@ class JobSearch extends Component {
                                         </DropdownButton>
                                 </div>
                             </div>
+                            <hr style={{ width: '100%',marginTop:'10px' }}></hr>
 
                             {joblist.slice(this.state.page * this.state.rowsPerPage, this.state.page * this.state.rowsPerPage + this.state.rowsPerPage).map((job, index) => {
                                 //{joblist.map((job, index) => {
                                 return (<div >
-                                    <Link onClick={() => this.showJob(index)} style={{ color: 'rgba(0, 0, 0, 0.8)' }}>
-                                        <div class="col-md-2" style={{ marginTop: '10px' }}><Avatar src={job.Company[0].image ? job.Company[0].image : this.state.emptyprofilepic} style={{ height: '50px', width: '50px', borderRadius: '0px', position: 'relative', left: '-20px' }} >DP</Avatar></div>
+                                    <Link onClick={() => this.showJob(((this.state.page*this.state.rowsPerPage)+index),job.Company[0]._id)} style={{ color: 'rgba(0, 0, 0, 0.8)' }}>
+                                        <div class="col-md-2" style={{ marginTop: '10px', position:'relative', left:'10px' }}><Avatar src={job.Company[0].image ? job.Company[0].image : this.state.emptyprofilepic} style={{ height: '50px', width: '50px', borderRadius: '0px', position: 'relative', left: '-20px' }} >DP</Avatar></div>
                                         <div class="col-md-10" style={{ marginBottom: '16px' }}>
                                             <p style={{ fontSize: '16px', fontWeight: '700' }}>{job.title}</p>
                                             <p style={{ fontSize: '16px', fontWeight: '400' }}>{job.Company[0].name}-{job.location}</p>
@@ -352,19 +349,13 @@ class JobSearch extends Component {
                             count={joblist.length}
                             rowsPerPage={this.state.rowsPerPage}
                             page={this.state.page}
-                            // SelectProps={{
-                            //     inputProps: { 'aria-label': 'rows per page' },
-                            //     native: true,
-                            // }}
                             onChangePage={this.handleChangePage}
                             onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                        // style={{fontSize:'2px'}}
                         />
                     </div>
                 )
                 jobdetailed = joblist[this.state.jobindex]
-                console.log(jobdetailed.applications.length)
-                if (jobdetailed.applications.length) {
+                if (jobdetailed.applications) {
                     applications = jobdetailed.applications.find(app => app.student_id === this.state.studentId)
                 }
                 console.log(applications)
@@ -377,7 +368,7 @@ class JobSearch extends Component {
                     <div>
                         <div style={{ float: "left", position: 'relative', left: '10px', top: '-20px' }}><img src={jobdetailed.Company[0].image ? jobdetailed.Company[0].image : this.state.emptyprofilepic} height='70px' width='70px' style={{ position: 'relative', top: '20px', left: '-30px' }} alt='Profile' /></div>
                         <div><p style={{ fontSize: '24px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{jobdetailed.title}</p>
-                            <p style={{ fontSize: '18px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{jobdetailed.Company[0].name}</p>
+                            <Link to = {'/company/viewprofile'}><p style={{ fontSize: '18px', fontWeight: '500', color: 'rgba(0, 0, 0, 0.8)' }}>{jobdetailed.Company[0].name}</p></Link>
                             <div class="row" style={{ position: 'relative', left: '85px' }}>
                                 <div class="col-md-3" style={{ padding: "0px" }}>
                                     <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-map-marker" style={{ color: "#1569E0" }}></span> {jobdetailed.location}</div>
@@ -386,13 +377,11 @@ class JobSearch extends Component {
                                 </div> <div class="col-md-3" style={{ padding: "0px" }}>
                                     <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-usd" style={{ color: "#1569E0" }}></span> {jobdetailed.salary + " per hour"}</div>
                                 </div></div>
-                            <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)', marginTop: '16px' }}>Posted on {jobdetailed.posting_date}</p></div>
+                            <p style={{ fontSize: '14px', fontWeight: '400', color: 'rgba(0,0,0,.56)', marginTop: '16px' }}>Posted on {jobdetailed.posting_date.slice(0,10)}</p></div>
                         <div style={{ border: 'Solid 1px', borderRadius: '5px', padding: '30px', marginBottom: '24px' }}>
                             <div class='col-md-9'>
                                 <p style={{ fontSize: '16px', fontWeight: '500', color: 'rgba(0,0,0,.8)', position: 'relative', top: '-12px', left: '-15px' }}>Applications close on {jobdetailed.deadline}</p></div>
                             <div class='col-md-3'>
-                                {/* {jobdetailed.applications.length?jobdetailed.applications.find(app=>app.student_id===this.state.studentId)}                    */}
-                                {/* <button class="btn btn-primary" style={{ backgroundColor: '#0d7f02', position:'relative', top:'-18px',border:'0px'}} onClick={()=>this.uploadResume(jobdetailed.company_id,jobdetailed._id)}>Quick Apply</button> */}
                                 {jobapplybutton}
                             </div>
                             <Dialog
@@ -465,4 +454,20 @@ class JobSearch extends Component {
 
 }
 
-export default JobSearch;
+const mapStateToProps = state => {
+    console.log(state)
+    return {
+        joblist : state.studentjobs,
+    };
+};
+
+function mapDispatchToProps(dispatch) {
+    return {
+        getStudentJobs : payload => dispatch(getStudentJobs(payload)),
+        applyJobs : (payload,config) => dispatch(applyJobs(payload,config)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(JobSearch);
+
+// export default JobSearch;

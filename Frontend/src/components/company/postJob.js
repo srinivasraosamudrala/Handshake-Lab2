@@ -49,7 +49,8 @@ class addJob extends Component{
         const data = {
             company_id      : localStorage.getItem('companyId'),
             title           : this.state.title,
-            posting_date    : new Date().toISOString().slice(0,10),
+            // posting_date    : new Date().toISOString().slice(0,10),
+            posting_date    : new Date().toISOString(),
             deadline        : this.state.deadline,
             location        : this.state.location,
             salary          : this.state.salary,

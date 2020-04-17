@@ -11,6 +11,8 @@ import IconButton from '@material-ui/core/IconButton';
 import EditOutlinedIcon from '@material-ui/icons/EditOutlined';
 import Avatar from '@material-ui/core/Avatar';
 import emptyPic from '../../../images/empty-profile-picture.png';
+// import { connect } from "react-redux";
+// import { getProfileData } from "../../../redux/actions/index";
 
 class Profile1 extends Component {
     constructor(props) {
@@ -49,10 +51,10 @@ class Profile1 extends Component {
                     cgpa:nextProps.profile.education.length>0?nextProps.profile.education[0].cgpa:""}
             }
 
-
             this.setState({
                 profiledata:profile_props,
-                image:nextProps.profile.image
+                image:nextProps.profile.image,
+                updateprofile : nextProps.updateprofilename,
             })
 
             
@@ -65,29 +67,32 @@ class Profile1 extends Component {
                     first_name: this.state.profile1_preferred,
                     last_name: this.state.profile1_last}
             }
-            axios.defaults.withCredentials = true;
-            axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-            axios.post(environment.baseUrl+'/student/profile', data)
-                .then(response => {
-                    if (response.data) {
-                        let profiledata = {
-                            first_name  : response.data.first_name,
-                            last_name   : response.data.last_name,
-                            college_name: response.data.education.length>0?response.data.education[0].college_name:"",
-                            degree      : response.data.education.length>0?response.data.education[0].degree:"",
-                            major       : response.data.education.length>0?response.data.education[0].major:"",
-                            cgpa        : response.data.education.length>0?response.data.education[0].cgpa:""}
-                        this.setState({
-                            profiledata : profiledata,
-                            image : response.data.image
-                        })
-                    } else {
-                        console.log(response.data.error)
-                    }
-                    this.setState(currentState => ({
-                        updateprofile: !currentState.updateprofile
-                    }))
-                })
+
+            this.props.updateProfileName(data)
+
+            // axios.defaults.withCredentials = true;
+            // axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+            // axios.post(environment.baseUrl+'/student/profile', data)
+            //     .then(response => {
+            //         if (response.data) {
+            //             let profiledata = {
+            //                 first_name  : response.data.first_name,
+            //                 last_name   : response.data.last_name,
+            //                 college_name: response.data.education.length>0?response.data.education[0].college_name:"",
+            //                 degree      : response.data.education.length>0?response.data.education[0].degree:"",
+            //                 major       : response.data.education.length>0?response.data.education[0].major:"",
+            //                 cgpa        : response.data.education.length>0?response.data.education[0].cgpa:""}
+            //             this.setState({
+            //                 profiledata : profiledata,
+            //                 image : response.data.image
+            //             })
+            //         } else {
+            //             console.log(response.data.error)
+            //         }
+            //         this.setState(currentState => ({
+            //             updateprofile: !currentState.updateprofile
+            //         }))
+            //     })
             }
 
     updateInfo = (e) => {
@@ -109,19 +114,21 @@ class Profile1 extends Component {
         const formData = new FormData();
         formData.append('studentId', localStorage.getItem('studentId'))
         formData.append('image', e.target.files[0]);
-        const config = {
-            headers: {
-                'content-type': 'multipart/form-data'
-            }
-        };
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        await axios.post(environment.baseUrl+"/student/uploadpic",formData, config)
-            .then((response) => {
-                this.setState({
-                    image:response.data.image
-                })
-            }).catch((error) => {
-            });
+
+        await this.props.updateProfilePic(formData)
+        // const config = {
+        //     headers: {
+        //         'content-type': 'multipart/form-data'
+        //     }
+        // };
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+        // await axios.post(environment.baseUrl+"/student/uploadpic",formData, config)
+        //     .then((response) => {
+        //         this.setState({
+        //             image:response.data.image
+        //         })
+        //     }).catch((error) => {
+        //     });
     }
 
     render() {
@@ -183,4 +190,5 @@ class Profile1 extends Component {
         )
     }
 }
+
 export default Profile1;

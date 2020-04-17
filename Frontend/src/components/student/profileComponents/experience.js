@@ -30,7 +30,6 @@ class Experience extends Component {
             addexp   : false,
             redirect : true,
             rerender : false,
-            addexp:false,
             existingEdit:false,
         }
         this.updateInfo = this.updateInfo.bind(this);
@@ -129,7 +128,11 @@ class Experience extends Component {
         if(nextProps.profile!== undefined){
         this.setState({ experience:nextProps.profile});  
             if (this.state.experience.length) {
-                this.setState({emptyexperience:false})
+                this.setState({
+                    emptyexperience:false,
+                    addexp:nextProps.addexperience,
+                    exp_id:nextProps.experiencestu_id
+                })
             }
         }
         }
@@ -137,13 +140,6 @@ class Experience extends Component {
     updateProfile = (e) => {
         // e.preventDefault();
         let stud_id = localStorage.getItem('studentId');
-        // this.setState({
-        //      redirect: false,
-        //     rerender: false,
-        //     addexp:false,
-        //     existingEdit:false
-        
-        // })
         let data = null
         if (!this.state.exp_id){
             data={
@@ -178,21 +174,22 @@ class Experience extends Component {
         }
        
         console.log(data)
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        axios.post(environment.baseUrl+'/student/profile', data)
-            .then(response => {
-                console.log("in frontend after response");
-                console.log(response.data)
-                if (response.data) {
-                    this.setState({
-                        experience:response.data.experience
-                    });
-                } else if (response.data.error) {
-                    console.log("response" + response.data.error)
-                }
-                this.cancel()
-            }
-            )
+        this.props.updateExperience(data)
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+        // axios.post(environment.baseUrl+'/student/profile', data)
+        //     .then(response => {
+        //         console.log("in frontend after response");
+        //         console.log(response.data)
+        //         if (response.data) {
+        //             this.setState({
+        //                 experience:response.data.experience
+        //             });
+        //         } else if (response.data.error) {
+        //             console.log("response" + response.data.error)
+        //         }
+        //         this.cancel()
+        //     }
+        //     )
     }
 
     addExperience = (e) => {

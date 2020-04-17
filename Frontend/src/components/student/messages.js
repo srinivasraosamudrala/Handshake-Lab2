@@ -7,6 +7,8 @@ import { Card, CardContent, Button, Dialog, DialogContent, TablePagination, Avat
 // import SendRoundedIcon from '@material-ui/icons/SendRounded';
 import emptyPic from '../../images/empty-profile-picture.png';
 import {environment} from '../../Utils/constants'
+import { connect } from "react-redux";
+import { getMessages } from "../../redux/actions/index";
 
 
 //create the Student Home Component
@@ -100,18 +102,20 @@ class Messages extends Component {
     }
 
     fetchmessages = () =>{
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        axios.get(environment.baseUrl+'/message/fetchmessages/' + localStorage.getItem('studentId'))
-            .then((response) => {
-                console.log(response.data)
-                if (response.data.length>0) {
-                    this.setState({
-                        messagelist: response.data,
-                        messagetext:""
-                    })
-            }
-        })
-        console.log(this.state.messagelist)
+        let data  = localStorage.getItem('studentId');
+        this.setState({messagetext:""})
+        this.props.getMessages(data)
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+        // axios.get(environment.baseUrl+'/message/fetchmessages/' + localStorage.getItem('studentId'))
+        //     .then((response) => {
+        //         console.log(response.data)
+        //         if (response.data.length>0) {
+        //             this.setState({
+        //                 messagelist: response.data,
+        //                 messagetext:""
+        //             })
+        //     }
+        // })
     }
 
     render() {
@@ -119,9 +123,9 @@ class Messages extends Component {
         let detailedconvo = null;
         let convodetailed = null;
 
-        if (this.state.messagelist) {
-            console.log(this.state.messagelist)
-            let messagelist = this.state.messagelist
+        if (this.props.messagelist) {
+            console.log(this.props.messagelist)
+            let messagelist = this.props.messagelist
 
             let compare = (a,b) =>{
                 let comparison = 0
@@ -184,24 +188,31 @@ class Messages extends Component {
                     <div>
                         <div style={{height:'45px', textAlign:'center'}}>
                         <h4 style = {{fontFamily : "Arial",fontWeight:"700", fontSize : '18px', margin : '0px'}}>{convodetailed.info[0].name?convodetailed.info[0].name:convodetailed.info[0].first_name+" "+convodetailed.info[0].last_name}</h4>
-                        <p style={{ fontSize: '13px', fontWeight: '400', margin : '0px', lineheight : '20px', color : 'rgba(0,0,0,.56)', }}>{convodetailed.info[0].college?(convodetailed.info[0].education[0].degree+","+convodetailed.info[0].education[0].major+" · "+convodetailed.info[0].college):(convodetailed.info[0].email+" · "+convodetailed.info[0].location)}</p>
+                        <p style={{ fontSize: '13px', fontWeight: '400', margin : '0px', lineheight : '20px', color : 'rgba(0,0,0,.56)', }}>{(convodetailed.info[0].education)?(convodetailed.info[0].education[0].degree+","+convodetailed.info[0].education[0].major+" · "+convodetailed.info[0].college):(convodetailed.info[0].email+" · "+convodetailed.info[0].location)}</p>
                         <hr style = {{width:'105%', position:"relative", left:"-16px",marginTop:'12px'}}></hr></div>
                         <div style = {{height : '310px', paddingTop:'10px', overflow:'auto',position:'relative',top:'10px'}}>
                             {console.log(convodetailed.messages[0].fromId)}
                             {convodetailed.messages.map((data,index) => {
                                 if(data.fromId===this.state.studentId){
-                                    return(
-                                    <div>
-                                    <div style={{float:'right',paddingRight:'13px',backgroundColor:'#e6f0ff',height:'30px',padding:'5px 15px',borderRadius:'15px 15px 0px 15px'}}>
-                                        <div style={{backgroundColor:'#e6f0f'}}>{data.message}</div>
-                                    </div><br/></div>)
+                                    return (
+                                        <div style={{ margin: '5px',textAlign:"right" }}>
+                                            <span style={{ textAlign:"right",backgroundColor: '#e6f0ff', marginbottom: '10px', padding: '5px', borderRadius: '15px 15px 0px 15px' }}>{data.message}</span>
+                                            <div style={{fontSize:'10px'}}>{data.dateTime.substring(0,6)+" "+data.dateTime.substring(11,16)}</div>
+                                        </div>)
                                 }
                                 else{
-                                    return(
-                                    <div style={{backgroundColor:'#f0f0f0',height:'30px',padding:'5px 15px',borderRadius:'0px 15px 15px 15px'}}>
-                                        <Avatar src={convodetailed.info[0].image} style={{height:'25px',width:'25px'}}></Avatar>
-                                        <div>{data.message}</div>
-                                    </div>)
+                                    return (
+                                        <div style={{ margin: '5px'}}>
+                                            <span style={{ padding: '5px', backgroundColor: '#f0f0f0', borderRadius: '0px 15px 15px 15px' }}>{data.message}</span>
+                                            <div style={{fontSize:'10px'}}>{data.dateTime.substring(0,6)+" "+data.dateTime.substring(11,16)}</div>
+                                         </div>)
+                                    
+                                    // return(
+                                    // <div >
+                                    //     <Avatar src={convodetailed.info[0].image} style={{height:'25px',width:'25px'}}></Avatar>
+                                    //     {/* <div style={{backgroundColor:'#f0f0f0',borderRadius:'0px 15px 15px 15px'}}>{data.message}</div> */}
+                                    //     <div>{data.message}</div>
+                                    // </div>)
                                 }
                             })}
                         </div>
@@ -242,4 +253,20 @@ class Messages extends Component {
 
 }
 
-export default Messages;
+const mapStateToProps = state => {
+    console.log(state.messages)
+    return {
+        messagelist : state.messages,
+        redirectToMessages : state.redirectToMessages
+    };
+};
+
+function mapDispatchToProps(dispatch) {
+    return {
+        getMessages : payload => dispatch(getMessages(payload))
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Messages);
+
+// export default Messages;

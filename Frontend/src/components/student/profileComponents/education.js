@@ -130,21 +130,17 @@ class Education extends Component {
         if(nextProps.profile!== undefined){
         this.setState({ education:nextProps.profile});  
             if (this.state.education.length) {
-                this.setState({emptyeducation:false})
+                this.setState({
+                    emptyeducation:false,
+                    addsch:nextProps.addschool,
+                    b_id:nextProps.educationstu_id
+                })
             }
         }
         }
 
     updateProfile = (e) => {
-        // e.preventDefault();
         let stud_id = localStorage.getItem('studentId');
-        // this.setState({
-        //      redirect: false,
-        //     rerender: false,
-        //     addEdu:false,
-        //     existingEdit:false
-        
-        // })
         let data = null
         console.log(this.state.month_of_starting)
         if (!this.state.b_id){
@@ -182,21 +178,22 @@ class Education extends Component {
         }
        
         console.log(data)
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        axios.post(environment.baseUrl+'/student/profile', data)
-            .then(response => {
-                console.log("in frontend after response");
-                console.log(response.data)
-                if (response.data) {
-                    this.setState({
-                        education:response.data.education
-                    });
-                } else if (response.data.error) {
-                    console.log("response" + response.data.error)
-                }
-                this.cancel()
-            }
-            )
+        this.props.updateEducation(data)
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+        // axios.post(environment.baseUrl+'/student/profile', data)
+        //     .then(response => {
+        //         console.log("in frontend after response");
+        //         console.log(response.data)
+        //         if (response.data) {
+        //             this.setState({
+        //                 education:response.data.education
+        //             });
+        //         } else if (response.data.error) {
+        //             console.log("response" + response.data.error)
+        //         }
+        //         this.cancel()
+        //     }
+        //     )
     }
 
     addEducation = (e) => {

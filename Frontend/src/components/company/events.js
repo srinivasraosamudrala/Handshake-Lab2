@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import '../../App.css';
 import axios from 'axios';
-import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
-import { Link } from 'react-router-dom';
 import { Card, CardContent} from '@material-ui/core/';
 import {environment} from '../../Utils/constants'
+import { connect } from "react-redux";
+import { getCompanyEvents } from "../../redux/actions/index";
 
 class Events extends Component {
     constructor(props) {
@@ -35,15 +35,16 @@ class Events extends Component {
             'companyId': localStorage.getItem('companyId')
         }
         console.log(data)
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        axios.get(environment.baseUrl+'/company/list-of-jobs-and-events/' + localStorage.getItem('companyId')+'/events')
-            .then((response) => {
-                //update the state with the response data
-                this.setState({
-                    eventlist: response.data
-                })
-                console.log(this.state.eventlist)
-            });
+        this.props.getCompanyEvents()
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+        // axios.get(environment.baseUrl+'/company/list-of-jobs-and-events/' + localStorage.getItem('companyId')+'/events')
+        //     .then((response) => {
+        //         //update the state with the response data
+        //         this.setState({
+        //             eventlist: response.data
+        //         })
+        //         console.log(this.state.eventlist)
+        //     });
     }
 
     postEvent = () => {
@@ -55,7 +56,7 @@ class Events extends Component {
     render() {
         //if not logged in go to login page
         let redirectVar = null;
-        let eventarr = this.state.eventlist
+        let eventarr = this.props.eventlist
         let eventlistvar = [];
         // if (!cookie.load('companycookie')) {
         if (localStorage.getItem('company_id')) {
@@ -75,7 +76,7 @@ class Events extends Component {
             viewEvent = <Redirect to={`/company/events/registrations/${this.state.editJob}`}/>
         }
         console.log(eventarr)
-        if (eventarr) {
+        if (Object.keys(eventarr).length) {
             eventlistvar = (<div>
                 {eventarr.map(event => {
                     return (
@@ -85,7 +86,7 @@ class Events extends Component {
                             <div style={{padding:'10px 0px 10px 50px'}}>
                                 <div className="row App-align">
                                     <div className="col-md-9" style={{ fontSize: "23px", color: "#1569E0",marginLeft:"-10px" }}>{event.event_name}</div>
-                                    <div className="col-md-3"><button class="btn btn-primary" style={{backgroundColor:'#1569E0', marginLeft:'15px', borderRadius:'15px'}}  onClick={()=>{this.viewRegistrations(event.eventId)}}>View Registrations</button></div>
+                                    <div className="col-md-3"><button class="btn btn-primary" style={{backgroundColor:'#1569E0', marginLeft:'15px', borderRadius:'15px'}}  onClick={()=>{this.viewRegistrations(event._id)}}>View Registrations</button></div>
                                 </div>
                                 <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-calendar" style={{ color: "#1569E0" }}></span> Timings: {event.date.substring(0,10)} at {event.time}</div>
                                 <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-map-marker" style={{ color: "#1569E0" }}></span> {event.location}</div>
@@ -121,6 +122,18 @@ class Events extends Component {
         )
     }
 }
+const mapStateToProps = state => {
+    console.log(state)
+    return {
+        eventlist : state.companyevents,
+    };
+};
 
-//export Home Component
-export default Events;
+function mapDispatchToProps(dispatch) {
+    return {
+        getCompanyEvents : payload => dispatch(getCompanyEvents(payload)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Events);
+// export default Events;

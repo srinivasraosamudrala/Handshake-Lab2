@@ -1,12 +1,9 @@
 import React,{Component} from 'react';
-import {Link} from 'react-router-dom';
-import cookie from 'react-cookies';
-import {Redirect} from 'react-router';
 import StudentNav from './studentNavbar';
-import { Card, CardContent, Button, IconButton, InputBase, Avatar } from '@material-ui/core/';
-import axios from 'axios';
+import { Card, CardContent, TablePagination } from '@material-ui/core/';
 import emptyPic from '../../images/empty-profile-picture.png';
-import {environment} from '../../Utils/constants'
+import { connect } from "react-redux";
+import { getStudentRegistrations } from "../../redux/actions/index";
 
 
 //create the Student Home Component
@@ -19,12 +16,26 @@ class Registrations extends Component {
             jobindex: 0,
             jobfilter: [],
             status:"",
-            emptyprofilepic:emptyPic
+            emptyprofilepic:emptyPic,
+            rowsPerPage: 5,
+            page: 0
         }
-        // this.handleLogout = this.handleLogout.bind(this);
-        // this.changeActivenav = this.changeActivenav.bind(this);
         this.statusFilter = this.statusFilter.bind(this)
     }
+
+    handleChangePage = (event, newPage) => {
+        this.setState({
+            page: newPage
+        })
+    };
+
+    handleChangeRowsPerPage = (event) => {
+        let rowsPerPage = parseInt(event.target.value, 10)
+        this.setState({
+            page: 0,
+            rowsPerPage: rowsPerPage
+        })
+    };
 
     statusFilter(e){
         console.log(e)
@@ -33,39 +44,25 @@ class Registrations extends Component {
         })
     }
 
-    arrayBufferToBase64(buffer) {
-        var binary = '';
-        var bytes = [].slice.call(new Uint8Array(buffer));
-        bytes.forEach((b) => binary += String.fromCharCode(b));
-        return window.btoa(binary);
-    };
-
     componentDidMount() {
         this.setState({ studentId: localStorage.getItem('studentId') })
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        axios.get(environment.baseUrl+'/student/eventregistrations/' + localStorage.getItem('studentId'))
-            .then((response) => {
-                console.log(response.data)
-                if (response.data) {
-                    // var base64Flag = 'data:image/jpeg;base64,';
-                    // response.data.result.map((event,index) => {
-                    //     console.log("profile")
-                    //     if (event.profilepic!== null) {
-                    //         var imgstring = this.arrayBufferToBase64(event.profilepic.data);
-                    //          event.profilepic = base64Flag + imgstring
-                    //     }
-                    // } )
-                this.setState({
-                    registrations: response.data
-                });
-            }
-            })
+        this.props.getStudentRegistrations()
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+        // axios.get(environment.baseUrl+'/student/eventregistrations/' + localStorage.getItem('studentId'))
+        //     .then((response) => {
+        //         console.log(response.data)
+        //         if (response.data) {
+        //         this.setState({
+        //             registrations: response.data
+        //         });
+        //     }
+        //     })
     }
 
     render(){
         let eventregistrations = null;
-        let registrations = this.state.registrations
-        if (registrations){
+        let registrations = this.props.registrations
+        if (registrations.length){
             if (this.state.status){
                 registrations=registrations.filter((app) => {
                     return this.state.status.indexOf(app.status) > -1
@@ -73,8 +70,8 @@ class Registrations extends Component {
             }
             eventregistrations = (
                 <div>
-                {registrations.map((app, index) => {
-                    
+                {/* {registrations.map((app, index) => { */}
+                {registrations.slice(this.state.page * this.state.rowsPerPage, this.state.page * this.state.rowsPerPage + this.state.rowsPerPage).map((app, index) => {
                 return (<Card style={{marginBottom:'20px', width:'80%', marginLeft:'150px'}}>
                     <CardContent>
                         <div class="col-md-1" style={{marginTop:'20px'}}>
@@ -86,7 +83,17 @@ class Registrations extends Component {
                         <div>Event is on {app.date} at {app.time}</div></div>
                     </CardContent>
                 </Card>)
-                })}
+                })
+                }
+                <TablePagination style = {{float:'right'}}
+                            rowsPerPageOptions={[1, 2, 5, 10, 25, { label: 'All', value: -1 }]}
+                            colSpan={3}
+                            count={registrations.length}
+                            rowsPerPage={this.state.rowsPerPage}
+                            page={this.state.page}
+                            onChangePage={this.handleChangePage}
+                            onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                        />
                 </div>
         )}
 
@@ -94,29 +101,26 @@ class Registrations extends Component {
        return(<div>
         <StudentNav comp="eventregistrations"/>
         <div style={{ paddingLeft: '5%', paddingRight: '5%', fontFamily: 'Arial' }}>
-        {/* <div class="col-md-3">
-            <Card>
-                <CardContent>
-                    <div>
-                    <div style={{fontWeight:'550',fontSize:'16px',marginBottom:'20px'}}>Filters</div>
-                    <div style={{fontWeight:'550',fontSize:'13px',padding:'16px'}}>Status</div>
-                    <select id="status" name="status" style = {{width:"80%",fontSize:'13px',marginLeft:'16px'}} onChange={this.statusFilter} >
-                        <option value="" disabled selected>+ Add Status</option>
-                        <option value="Applied">Applied</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Reviewed">Reviewed</option>
-                        <option value="Declined">Declined</option>
-                    </select></div>
-                </CardContent>
-            </Card>
-        </div> */}
-        <div>
             {eventregistrations}
-        </div>
         </div>
         </div>
        )
 }
 }
 
-export default Registrations;
+const mapStateToProps = state => {
+    console.log(state)
+    return {
+        registrations: state.studentregistrations,
+    };
+};
+
+function mapDispatchToProps(dispatch) {
+    return {
+        getStudentRegistrations : payload => dispatch(getStudentRegistrations(payload)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Registrations);
+
+// export default Registrations;

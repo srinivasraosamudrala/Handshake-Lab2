@@ -81,7 +81,9 @@ class Login extends Component {
         let invalid = null;
         if (this.state.token.length > 0) {
             localStorage.setItem("token", this.state.token);
+            console.log(this.state.token)
             var decoded = jwt_decode(this.state.token.split(' ')[1]);
+            console.log(decoded)
             localStorage.setItem("companyId", decoded._id);
             console.log(localStorage.getItem("companyId"));
     } 

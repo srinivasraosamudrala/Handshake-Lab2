@@ -45,6 +45,7 @@ fetchMessages = async (messageQuery) => {
             return await processLookup(result,messageQuery)
     }
     catch (error) {
+        console.log(error)
         return new Error(error)
     }
 }

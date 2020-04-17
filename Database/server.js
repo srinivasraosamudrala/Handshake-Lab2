@@ -65,7 +65,7 @@ async function handleTopicRequestAsync(topic_name,fname){
             //     result = err
             // }
             // console.log(`after handle :`);
-            // console.log(result)
+            console.log(res)
             var payloads = [
                 { topic: data.replyTo,
                     messages:JSON.stringify({

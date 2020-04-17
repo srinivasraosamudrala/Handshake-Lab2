@@ -4,6 +4,8 @@ import axios from 'axios';
 import { Redirect } from 'react-router';
 import { Card, CardContent, TablePagination} from '@material-ui/core/';
 import {environment} from '../../Utils/constants'
+import { connect } from "react-redux";
+import { getCompanyJobs } from "../../redux/actions/index";
 
 
 class Home extends Component {
@@ -48,16 +50,17 @@ class Home extends Component {
 
     //get the job data from backend  
     componentDidMount() {
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        axios.get(environment.baseUrl+'/company/list-of-jobs-and-events/' + localStorage.getItem('companyId')+'/jobs')
-            .then((response) => {
-                //update the state with the response data
-                console.log(response.data)
-                this.setState({
-                    joblist: response.data.result
-                })
-                console.log(this.state.joblist)
-            });
+        this.props.getCompanyJobs();
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+        // axios.get(environment.baseUrl+'/company/list-of-jobs-and-events/' + localStorage.getItem('companyId')+'/jobs')
+        //     .then((response) => {
+        //         //update the state with the response data
+        //         console.log(response.data)
+        //         this.setState({
+        //             joblist: response.data.result
+        //         })
+        //         console.log(this.state.joblist)
+        //     });
     }
 
     postJob = () => {
@@ -70,7 +73,7 @@ class Home extends Component {
         //if not logged in go to login page
         let redirectVar = null;
         let redirectjobVar = null;
-        let jobarr = this.state.joblist
+        let jobarr = this.props.joblist
         console.log("Start",jobarr)
         let joblistvar = [];
         // if (!cookie.load('companycookie')) {
@@ -137,4 +140,20 @@ class Home extends Component {
     }
 }
 
-export default Home;
+
+const mapStateToProps = state => {
+    console.log(state)
+    return {
+        joblist : state.companyjobs,
+    };
+};
+
+function mapDispatchToProps(dispatch) {
+    return {
+        getCompanyJobs : payload => dispatch(getCompanyJobs(payload)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
+
+// export default Home;

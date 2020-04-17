@@ -32,7 +32,8 @@ class CareerObj extends Component {
 
     componentWillReceiveProps(nextProps) {     
             this.setState({
-                careerObj:nextProps.profile
+                careerObj:nextProps.profile,
+                updateprofile:nextProps.updatecareerobj
             })
             }
 
@@ -41,19 +42,20 @@ class CareerObj extends Component {
             studentId: localStorage.getItem('studentId'),
             update:{career_objective: this.state.careerObj_preferred}
             }
-            axios.defaults.withCredentials = true;
-            axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-            axios.post(environment.baseUrl+'/student/profile', data)
-                .then(response => {
-                    if (response.data) {
-                        this.setState({
-                            careerObj : response.data.career_objective,
-                            updateprofile: false
-                        })
-                    } else {
-                        console.log(response.data.error)
-                    }
-                })
+            this.props.updateCareerObj(data)
+            // axios.defaults.withCredentials = true;
+            // axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+            // axios.post(environment.baseUrl+'/student/profile', data)
+            //     .then(response => {
+            //         if (response.data) {
+            //             this.setState({
+            //                 careerObj : response.data.career_objective,
+            //                 updateprofile: false
+            //             })
+            //         } else {
+            //             console.log(response.data.error)
+            //         }
+            //     })
             }
 
     updateInfo = (e) => {

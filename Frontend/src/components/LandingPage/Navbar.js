@@ -4,6 +4,8 @@ import cookie from 'react-cookies';
 import {Redirect} from 'react-router';
 import '../../App.css'
 import Handshake_Logo from '../../images/Handshake_Logo.png'
+import { connect } from "react-redux";
+import { handleLogout } from "../../redux/actions/index";
 
 //create the Navbar Component
 class Navbar extends Component {
@@ -17,15 +19,8 @@ class Navbar extends Component {
     }
     //handle logout to destroy the cookie
     handleLogout = () => {
-        // if (cookie.load('companycookie')){
-            localStorage.removeItem('companyId')
-            localStorage.removeItem('sstudentId')
-            // cookie.remove('companycookie', { path: '/' })
-        // }else{
-            localStorage.removeItem('studentId')
-            localStorage.removeItem('sstudentId')
-            // cookie.remove('studentcookie',{ path:'/' })
-        // }
+        localStorage.clear();
+        this.props.handleLogout();
     }
     changeActivenav = (e) => {
         this.setState({
@@ -52,7 +47,7 @@ class Navbar extends Component {
                     <ul class="nav navbar-nav navbar-right">
                         <li class = 'active'><Link to="/company/home">Jobs</Link></li>
                         <li class='navli'><Link to="/company/events">Events</Link></li>
-                        <li class='navli'><Link to="/student/studentsearch">Students</Link></li>
+                        <li class='navli'><Link to="/company/studentsearch">Students</Link></li>
                         <li class='navli'><Link to="/company/conversations">Messages</Link></li>
                         <li class='navli'><Link to="/company/profile">Profile</Link></li>
                         <li class='navli'><Link to="/" onClick = {this.handleLogout}><span class="glyphicon glyphicon-user"></span>Logout</Link></li> 
@@ -116,4 +111,18 @@ class Navbar extends Component {
     }
 }
 
-export default Navbar;
+// export default Navbar;
+const mapStateToProps = state => {
+    console.log(state)
+    return {
+        studentsList: state.studentlist
+    };
+};
+
+function mapDispatchToProps(dispatch) {
+    return {
+        handleLogout: payload => dispatch(handleLogout(payload)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Navbar);

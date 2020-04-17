@@ -1,8 +1,9 @@
 var express = require('express');
 var kafka = require('../kafka/client');
 var router = express.Router();
+const { checkAuth } = require("../utils/passport");
 
-router.post('/sendmessage',(req,res) => {
+router.post('/sendmessage',checkAuth,(req,res) => {
     req.body.path = 'createConversation'
     kafka.make_request('chat',req.body, (err,result) => {
         console.log('in result');
@@ -21,6 +22,7 @@ router.post('/sendmessage',(req,res) => {
 })
 
 router.get('/fetchmessages/:id',(req,res) => {
+    console.log(req.params.id)
     req.body.id = req.params.id
     req.body.path = "fetchMessages"
     kafka.make_request('chat',req.body, (err,result) => {

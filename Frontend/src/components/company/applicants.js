@@ -6,6 +6,8 @@ import { Redirect } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, Dialog, DialogContent,Avatar } from '@material-ui/core';
 import emptyPic from '../../images/empty-profile-picture.png';
+import { connect } from "react-redux";
+import { getJobApplicants } from "../../redux/actions/index";
 
 //Define a Login Component
 class ViewApplicants extends Component {
@@ -67,11 +69,12 @@ class ViewApplicants extends Component {
     viewProfile = (e) => {
         var headers = new Headers();
         //prevent page from refresh
-        console.log(e.target.value);
+        console.log(e);
         this.setState({
             view_profile: true,
-            studId:e.target.value
+            studId:e
         })
+        localStorage.setItem('sstudentId',e)
     }
 
     inputChangeHandler = (e) => {
@@ -81,13 +84,6 @@ class ViewApplicants extends Component {
         })
         console.log(this.state)
     }
-
-    arrayBufferToBase64(buffer) {
-        var binary = '';
-        var bytes = [].slice.call(new Uint8Array(buffer));
-        bytes.forEach((b) => binary += String.fromCharCode(b));
-        return window.btoa(binary);
-    };
 
     componentDidMount() {
         this.fetchApplicants()
@@ -100,21 +96,22 @@ class ViewApplicants extends Component {
             job_id:this.state.job_id
         }
         console.log(data)
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        axios.post(environment.baseUrl+'/company/listApplicants', data)
-            .then(response => {
-                console.log("in frontend after response");
-                console.log(response.data.result)
-                if (response.data.result) {
-                    this.setState({
-                        dataRetrieved: true,
-                        stuData: response.data.result
-                    });
-                  console.log(this.state.stuData)
-                } else if (response.data.error) {
-                    console.log("response" + response.data.error)
-                }
-            })
+        this.props.getJobApplicants(data)
+        // axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+        // axios.post(environment.baseUrl+'/company/listApplicants', data)
+        //     .then(response => {
+        //         console.log("in frontend after response");
+        //         console.log(response.data.result)
+        //         if (response.data.result) {
+        //             this.setState({
+        //                 dataRetrieved: true,
+        //                 stuData: response.data.result
+        //             });
+        //           console.log(this.state.stuData)
+        //         } else if (response.data.error) {
+        //             console.log("response" + response.data.error)
+        //         }
+        //     })
     }
 
     tojobs = (e) =>{
@@ -136,7 +133,7 @@ class ViewApplicants extends Component {
         //     renderRedirect = <Redirect to='/jobs' />
         // }
         if (this.state.view_profile === true) {
-            renderRedirect = <Redirect to={`/ViewProfile/${this.state.studId}`}/>
+            renderRedirect = <Redirect to={`/company/viewStudent`}/>
         }
 
         if(this.state.showStatus === true){
@@ -154,7 +151,7 @@ class ViewApplicants extends Component {
             renderRedirect = <Redirect to= "/company/home"/>
         }
         
-        let stuData = this.state.stuData;
+        let stuData = this.props.stuData;
         console.log(stuData)
         return (
             <div>
@@ -179,7 +176,7 @@ class ViewApplicants extends Component {
                                                 <div className="col-md-1">
                                                     <img src={stuData[0].studentDetails[index].image?stuData[0].studentDetails[index].image:this.state.emptyprofilepic} height='70' width='70' style={{ position:'relative',top:'20px',left:'-30px'}} alt='Profile'/>
                                                 </div>
-                                                <div className="col-md-8" style={{ fontSize: "23px", color: "#1569E0",marginLeft:"-10px" }}><Link onClick = {()=>(this.viewProfile(data.stud_id))}>{stuData[0].studentDetails[index].first_name+ " " +stuData[0].studentDetails[index].last_name}</Link>
+                                                <div className="col-md-8" style={{ fontSize: "23px", color: "#1569E0",marginLeft:"-10px" }}><Link onClick = {()=>(this.viewProfile(stuData[0].studentDetails[index]._id))}>{stuData[0].studentDetails[index].first_name+ " " +stuData[0].studentDetails[index].last_name}</Link>
                                                 <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-envelope" style={{ color: "#1569E0" }}></span> {stuData[0].studentDetails[index].email}</div>    
                                                 <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-book" style={{ color: "#1569E0" }}></span> {stuData[0].studentDetails[index].college}</div>
                                                 <div style={{ fontSize: "13px" }}><span class="glyphicon glyphicon-calendar" style={{ color: "#1569E0" }}></span> Applied on {data.applied_date}</div>
@@ -232,5 +229,18 @@ class ViewApplicants extends Component {
         )
     }
 }
-//export Login Component
-export default ViewApplicants;
+const mapStateToProps = state => {
+    console.log(state)
+    return {
+        stuData : state.jobapplicants,
+    };
+};
+
+function mapDispatchToProps(dispatch) {
+    return {
+        getJobApplicants : payload => dispatch(getJobApplicants(payload)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ViewApplicants);
+// export default ViewApplicants;

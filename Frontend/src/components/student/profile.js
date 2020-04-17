@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
 import '../../App.css';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { Card,Button} from '@material-ui/core/';
-import IconButton from '@material-ui/core/IconButton';
+import {Card} from '@material-ui/core/';
 import { connect } from "react-redux";
-import EditOutlinedIcon from '@material-ui/icons/EditOutlined';
-import emptyPic from '../../images/empty-profile-picture.png';
-import {environment} from '../../Utils/constants'
-import { saveProfileData } from "../../redux/actions/index";
+import { getProfileData, updateProfileName,
+        updateProfilePic,updateCareerObj,updatePersonalInfo,
+        updateEducation,updateExperience, updateSkill } from "../../redux/actions/index";
+import {environment} from '../../Utils/constants';
 import Profile1 from "./profileComponents/profile1";
 import CareerObj from './profileComponents/careerobj';
 import Skillset from './profileComponents/skills';
@@ -16,13 +14,9 @@ import PersonalInfo from './profileComponents/personalinfo';
 import Education from './profileComponents/education';
 import Experience from './profileComponents/experience';
 
-//Define a Login Component
 class Profile extends Component {
-    //call the constructor method
     constructor(props) {
-        //Call the constrictor of Super class i.e The Component
         super(props);
-        //maintain the state required for this component
         this.state = {
             profiledata:"",
             studentId: ""
@@ -30,26 +24,26 @@ class Profile extends Component {
     }
 
     componentDidMount() {
-        this.readstudentdata()
+        // this.readstudentdata()
+        this.props.getProfileData()
     }
 
-    readstudentdata(){
-        this.setState({ studentId: localStorage.getItem('studentId') })
-        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        axios.get(environment.baseUrl+'/student/profile/' + localStorage.getItem('studentId'))
-            .then((response) => {
-                //update the state with the response data
-                if(response.data){
-                console.log(response.data)
-                this.props.saveProfileData(response.data)
-                const data = response.data
-                    this.setState({
-                        profiledata:data[0],
-                    })
+    // readstudentdata(){
+    //     this.setState({ studentId: localStorage.getItem('studentId') })
+    //     axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+    //     axios.get(environment.baseUrl+'/student/profile/' + localStorage.getItem('studentId'))
+    //         .then((response) => {
+    //             if(response.data){
+    //             console.log(response.data)
+    //             // this.props.saveProfileData(response.data)
+    //             const data = response.data
+    //                 this.setState({
+    //                     profiledata:data[0],
+    //                 })
 
-                    console.log(this.state.profiledata)
-            }});
-    }
+    //                 console.log(this.props.profiledata)
+    //         }});
+    // }
 
     render() {
         return (
@@ -59,31 +53,44 @@ class Profile extends Component {
                     </div>
                     <div class="col-md-3">
                         <div class="row" style={{ marginBottom: '20px', marginRight: '20px'}}>
-                            <Profile1 profile = {this.state.profiledata}/>
+                            <Profile1   profile = {this.props.profiledata} 
+                                        updateProfileName={this.props.updateProfileName}
+                                        updateprofilename = {this.props.updateprofilename}
+                                        updateProfilePic = {this.props.updateProfilePic} />
                         </div>
                         <div class="row" style={{ marginBottom: '20px', marginRight: '20px' }}>
-                            <Skillset profile = {this.state.profiledata.skills} />
+                            <Skillset   profile = {this.props.profiledata.skills}
+                                        updateSkill = {this.props.updateSkill}
+                                        addskill = {this.props.addskill} />
                         </div>
                         <div class="row" style={{ marginBottom: '20px', marginRight: '20px' }}>
-                            <PersonalInfo profile = {this.state.profiledata}/>
+                            <PersonalInfo   profile = {this.props.profiledata}
+                                            updatePersonalInfo = {this.props.updatePersonalInfo}
+                                            updatepersonalinfo = {this.props.updatepersonalinfo}/>
                         </div>
                     </div>
                     <div class="col-md-7">
                         <div class="row" style={{ marginBottom: '20px' }}>
                             <Card>
-                                <CareerObj profile = {this.state.profiledata.career_objective}/>
+                                <CareerObj profile = {this.props.profiledata.career_objective}
+                                            updateCareerObj = {this.props.updateCareerObj}
+                                            updatecareerobj = {this.props.updatecareerobj}/>
                             </Card>
                         </div>
                         <div class="row" style={{ marginBottom: '20px' }}>
                             <Card>
-                                {console.log(this.state.profiledata)}
-                                {console.log(this.state.profiledata.education)}
-                                <Education profile = {this.state.profiledata.education}/>
+                                <Education profile = {this.props.profiledata.education}
+                                            updateEducation = {this.props.updateEducation}
+                                            addschool = {this.props.addschool}
+                                            educationstu_id = {this.props.educationstu_id}/>
                             </Card>
                         </div>
                         <div class="row" style={{ marginBottom: '20px' }}>
                             <Card>
-                                <Experience profile = {this.state.profiledata.experience}/>
+                                <Experience profile = {this.props.profiledata.experience}
+                                            updateExperience = {this.props.updateExperience}
+                                            addexperience = {this.props.addexperience}
+                                            experiencestu_id = {this.props.experiencestu_id}/>
                             </Card>
                         </div>
                     </div>
@@ -92,25 +99,33 @@ class Profile extends Component {
         )
     }
 }
-//export Profile Component
-//export default Profile;
-// const mapStateToProps = state => {
-//     return {
-//         user: state.user,
-//     };
-// };
 
 
-// export default connect(mapStateToProps, null)(Profile);
 const mapStateToProps = state => {
+    console.log(state)
     return {
-        profile: state.profile
+        profiledata : state.profile,
+        updateprofilename : state.updateprofilename,
+        updatecareerobj : state.updatecareerobj,
+        updatepersonalinfo : state.updatepersonalinfo,
+        addschool: state.addschool,
+        educationstu_id: state.educationstu_id,
+        addexperience : state.addexperience,
+        experiencestu_id: state.experiencestu_id,
+        addskill: state.addskill
     };
 };
 
 function mapDispatchToProps(dispatch) {
     return {
-        saveProfileData: payload => dispatch(saveProfileData(payload))
+        getProfileData: payload => dispatch(getProfileData(payload)),
+        updateProfileName: payload => dispatch(updateProfileName(payload)),
+        updateProfilePic: payload => dispatch(updateProfilePic(payload)),
+        updateCareerObj: payload => dispatch(updateCareerObj(payload)),
+        updatePersonalInfo: payload => dispatch(updatePersonalInfo(payload)),
+        updateEducation: payload => dispatch(updateEducation(payload)),
+        updateExperience: payload => dispatch(updateExperience(payload)),
+        updateSkill: payload => dispatch(updateSkill(payload)),
     };
 }
 

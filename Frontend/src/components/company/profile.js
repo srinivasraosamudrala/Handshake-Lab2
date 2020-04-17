@@ -203,8 +203,8 @@ class Profile extends Component {
                             <div style = {{position:'relative', top:'-70px',left:'85px'}}>
                                 <div className="col-md-9">
                                     <div><h4>{this.state.profile.name}</h4></div>
-                                    <div className="col-md-7" style={{marginLeft:"-10px",marginTop:"7px"}}><span class="glyphicon glyphicon-map-marker" style={{color: "Black" }}></span> {this.state.profile.location}</div>
-                                    <div className="col-md-3" style={{marginLeft:"-10px",marginTop:"7px"}}><span class="glyphicon glyphicon-envelope" style={{color: "Black" }}></span> {this.state.profile.email}</div>
+                                    <div className="col-md-6" style={{marginLeft:"-10px",marginTop:"7px"}}><span class="glyphicon glyphicon-map-marker" style={{color: "Black" }}></span> {this.state.profile.location}</div>
+                                    <div className="col-md-4" style={{marginLeft:"-10px",marginTop:"7px"}}><span class="glyphicon glyphicon-envelope" style={{color: "Black" }}></span> {this.state.profile.email}</div>
                                     </div>
                                 </div>
                                 <div className="col-md-3">

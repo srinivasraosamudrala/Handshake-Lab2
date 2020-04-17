@@ -19,7 +19,7 @@ class Profile extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            studentId: localStorage.getItem('studentId'),
+            companyId: localStorage.getItem('companyId'),
             currentstudentId: localStorage.getItem('sstudentId'),
             messagestudent: false,
             mess: "",
@@ -70,14 +70,15 @@ class Profile extends Component {
         const [{ value: mo }, , { value: da }, , { value: ye }] = dtf.formatToParts(currentdate)
         let datestr = mo + " " + da + " " + ye + " " + currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds()
         let data = null
-        console.log(this.state.studentId)
+        console.log(this.state.companyId)
+        console.log(this.state.currentstudentId)
         data = {
-            id1: this.state.studentId,
+            id1: this.state.companyId,
             id2: this.state.currentstudentId,
             update: {
                 id1: {
-                    sender: this.state.studentId,
-                    persona: "students"
+                    sender: this.state.companyId,
+                    persona: "companies"
                 },
                 id2: {
                     receiver: this.state.currentstudentId,
@@ -85,7 +86,7 @@ class Profile extends Component {
                 },
                 $push: {
                     messages: [{
-                        fromId: this.state.studentId,
+                        fromId: this.state.companyId,
                         message: this.state.mess,
                         dateTime: datestr
                     }]
@@ -117,7 +118,7 @@ class Profile extends Component {
         console.log(studentview)
 
         if(this.props.redirectToMessages){
-           redirectVar =  <Redirect to = {`/student/conversations`}/>
+           redirectVar =  <Redirect to = {`/company/conversations`}/>
         }
 
         if (studentview) {
@@ -187,8 +188,8 @@ class Profile extends Component {
                                             <center>
                                                 <h1 style={{ fontSize: '30px' }}>{studentview.first_name + " " + studentview.last_name}</h1>
                                                 {(studentview.college) ? (<h4 >{studentview.college}</h4>) : <div></div>}
-                                                {(studentview.education[0]) ? (<h4 style={{ fontSize: '15px' }}>{studentview.education[0].degree + "," + studentview.education[0].major}</h4>) : (<div></div>)}
-                                                {(studentview.education[0]) ? (<Typography color="textSecondary">
+                                                {(studentview.education[0].degree) ? (<h4 style={{ fontSize: '15px' }}>{studentview.education[0].degree + "," + studentview.education[0].major}</h4>) : (<div></div>)}
+                                                {(studentview.education[0].degree && studentview.education[0].cgpa) ? (<Typography color="textSecondary">
                                                     <h4 >{studentview.education[0].degree + " • GPA:" + studentview.education[0].cgpa}</h4>
                                                 </Typography>) : <div></div>}
                                                 <button class="btn btn-primary" style={{ backgroundColor: '#1569e0', border: '0px', width: '85%' }} onClick={() => this.messageStudent()}>Message</button>
