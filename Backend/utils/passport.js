@@ -2,8 +2,8 @@ var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
 const passport = require('passport');
 var { secret } = require("./config");
-const Students = require('../Models/StudentModel');
-const Company = require('../Models/CompanyModel');
+const Students = require('../Models/studentModel');
+const Company = require('../Models/companyModel');
 // const Users = require('../Models/UserModel');
 function auth() {
     var opts = {
