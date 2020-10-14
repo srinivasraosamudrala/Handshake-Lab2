@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const mongoDB= 'mongodb+srv://handshakeuser:handshake@cluster0-e4iwa.mongodb.net/test?retryWrites=true&w=majority'
+const mongoDB= ''
 
 var options = {
   useNewUrlParser: true,

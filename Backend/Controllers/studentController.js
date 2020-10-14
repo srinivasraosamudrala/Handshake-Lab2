@@ -12,12 +12,6 @@ const { checkAuth,studauth } = require("../utils/passport");
 const jwt = require('jsonwebtoken');
 var { secret } = require("../utils/config");
 
-const s3 = new AWS.S3({
-	    accessKeyId:
-	        "AKIAIXZQ2BJZTGBO36DQ",
-	    secretAccessKey:
-	        "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"
-    })
     var storage = multer.diskStorage({
         destination: (req, file, cb) => {
             if (file.mimetype === "application/pdf") {
